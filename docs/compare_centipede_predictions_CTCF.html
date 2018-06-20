@@ -12,7 +12,7 @@
 <meta name="author" content="Kaixuan Luo" />
 
 
-<title>Compare CENTIPEDE predictions for CTCF</title>
+<title>Compare CENTIPEDE predictions for HIF1A</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -327,7 +327,7 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Compare CENTIPEDE predictions for CTCF</h1>
+<h1 class="title toc-ignore">Compare CENTIPEDE predictions for HIF1A</h1>
 <h4 class="author"><em>Kaixuan Luo</em></h4>
 <h4 class="date"><em>6/18/2018</em></h4>
 
@@ -358,7 +358,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> a1c2b7c </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/09c8606617477e5957c9e5b74ac0ca403a59b785" target="_blank">09c8606</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -404,7 +404,41 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
-a1c2b7c
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/09c8606617477e5957c9e5b74ac0ca403a59b785/analysis/compare_centipede_predictions_CTCF.Rmd" target="_blank">09c8606</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+<td style="text-align:left;">
+compare centipede predictions for CTCF
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/kevinlkx/ATAC-seq_analysis/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/compare_centipede_predictions_CTCF.html" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/a1c2b7c5d5cc6d699308bfe1f3b38481d83de5ef/analysis/compare_centipede_predictions_CTCF.Rmd" target="_blank">a1c2b7c</a>
 </td>
 <td style="text-align:left;">
 kevinlkx
@@ -425,7 +459,34 @@ compare centipede predictions for CTCF
 library(grid)
 library(gridExtra)
 library(limma)
-library(edgeR)</code></pre>
+library(edgeR)
+library(VennDiagram)</code></pre>
+<pre><code>Warning: package &#39;VennDiagram&#39; was built under R version 3.4.4</code></pre>
+<pre><code>Loading required package: futile.logger</code></pre>
+<pre class="r"><code>message &lt;- futile.logger::flog.threshold(futile.logger::ERROR, name = &quot;VennDiagramLogger&quot;)
+
+## venn diagram
+plot_venn_overlaps &lt;- function(overlaps.m, title = &quot;&quot;, col_fill = NULL, category.names = NULL){
+  grid.newpage()
+  overlaps_venn.l &lt;- lapply(as.data.frame(overlaps.m), function(x) which(x == 1))
+  if(is.null(col_fill)){
+    col_fill &lt;-  1:length(overlaps_venn.l)
+  }
+  if(is.null(category.names)){
+    category.names &lt;- names(x)
+  }
+  
+  venn.plot &lt;- venn.diagram( 
+    x = overlaps_venn.l,
+    category.names = category.names, 
+    filename = NULL,
+    fill = col_fill,
+    alpha=rep(0.5, length(overlaps_venn.l)), 
+    cex = 1.5, 
+    cat.fontface=4, 
+    main=title) 
+  grid.draw(venn.plot)
+}</code></pre>
 <div id="select-tf" class="section level2">
 <h2>select TF</h2>
 <pre class="r"><code>tf_name &lt;- &quot;CTCF&quot;
@@ -495,6 +556,12 @@ cat(length(idx_bound), &quot;sites are bound in at least two samples \n&quot;)</
 <pre><code>34309 sites are bound in at least two samples </code></pre>
 <pre class="r"><code>cat(length(idx_bound), &quot;(&quot;,round(length(idx_bound)/nrow(CentPostPr.df) *100, 2), &quot;% ) sites are bound in at least two samples \n&quot;)</code></pre>
 <pre><code>34309 ( 8.74 % ) sites are bound in at least two samples </code></pre>
+<pre class="r"><code>bound_N &lt;- rowSums(CentPostPr.df[,c(&quot;N1&quot;, &quot;N2&quot;, &quot;N3&quot;)] &gt; thresh_PostPr_bound) &gt;= 2
+bound_H &lt;- rowSums(CentPostPr.df[,c(&quot;H1&quot;, &quot;H2&quot;, &quot;H3&quot;)] &gt; thresh_PostPr_bound) &gt;= 2
+bound_N_H &lt;- data.frame(N = bound_N, H = bound_H)
+plot_venn_overlaps(bound_N_H, title = paste(&quot;Number of&quot;, tf_name, &quot;bound sites&quot;), 
+                   category.names = c(&quot;Bound in N&quot;, &quot;Bound in H&quot;), col_fill = c(&quot;blue&quot;, &quot;red&quot;))</code></pre>
+<p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="plot-average-binding-and-average-logratios" class="section level2">
 <h2>Plot average binding and average logRatios</h2>
@@ -506,6 +573,36 @@ plot(rowMeans(CentPostPr_N.df), rowMeans(CentPostPr_H.df),
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(a=0,b=1)</code></pre>
 <p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-5-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-5-1.png" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
 plot(rowMeans(CentLogRatios_N.df), rowMeans(CentLogRatios_H.df), 
@@ -519,6 +616,36 @@ plot(x = (rowMeans(CentLogRatios_H.df)+rowMeans(CentLogRatios_N.df))/2,
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-5-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-5-2.png" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="bound-sites" class="section level3">
 <h3>bound sites</h3>
@@ -528,6 +655,36 @@ plot(rowMeans(CentPostPr_N.df[idx_bound,]), rowMeans(CentPostPr_H.df[idx_bound,]
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(a=0,b=1)</code></pre>
 <p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-6-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-6-1.png" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
 plot(rowMeans(CentLogRatios_N.df[idx_bound,]), rowMeans(CentLogRatios_H.df[idx_bound,]), 
@@ -541,6 +698,36 @@ plot(x = (rowMeans(CentLogRatios_H.df[idx_bound,])+rowMeans(CentLogRatios_N.df[i
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-6-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-6-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-6-2.png" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 </div>
 <div id="pca" class="section level2">
@@ -558,6 +745,36 @@ p &lt;- p + geom_point() + geom_text(size = 3, show.legend = F, vjust = 2, nudge
   labs(title = tf_name, x = percentage[1], y = percentage[2])
 p</code></pre>
 <p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-7-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-7-1.png" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="bound-sites-1" class="section level3">
 <h3>bound sites</h3>
@@ -572,6 +789,36 @@ p &lt;- p + geom_point() + geom_text(size = 3, show.legend = F, vjust = 2, nudge
   labs(title = tf_name, x = percentage[1], y = percentage[2])
 p</code></pre>
 <p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-8-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-8-1.png" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 </div>
 <div id="differential-logratios-for-bound-sites-using-limma" class="section level2">
@@ -620,6 +867,36 @@ plot(x = fit2$coef, y = -log10(fit2$p.value),
      xlab = &quot;Difference in logRatios (H - N)&quot;, ylab = &quot;-log10(P-value)&quot;, main= paste(tf_name, &quot;H vs. N&quot;),
      pch = 16, cex = 0.35)</code></pre>
 <p><img src="figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-9-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/5cc11832dc8ae8ebb518a0f2915809ad5916cb5a/docs/figure/compare_centipede_predictions_CTCF.Rmd/unnamed-chunk-9-1.png" target="_blank">5cc1183</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-06-20
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -640,20 +917,22 @@ attached base packages:
 [8] base     
 
 other attached packages:
-[1] edgeR_3.20.9  limma_3.34.9  gridExtra_2.3 ggplot2_2.2.1
+[1] VennDiagram_1.6.20  futile.logger_1.4.3 edgeR_3.20.9       
+[4] limma_3.34.9        gridExtra_2.3       ggplot2_2.2.1      
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.16      knitr_1.20        whisker_0.3-2    
- [4] magrittr_1.5      workflowr_1.0.1   splines_3.4.3    
- [7] munsell_0.4.3     lattice_0.20-35   colorspace_1.3-2 
-[10] rlang_0.2.0       stringr_1.3.0     plyr_1.8.4       
-[13] tools_3.4.3       gtable_0.2.0      R.oo_1.22.0      
-[16] git2r_0.21.0      htmltools_0.3.6   yaml_2.1.18      
-[19] lazyeval_0.2.1    rprojroot_1.3-2   digest_0.6.15    
-[22] tibble_1.4.2      R.utils_2.6.0     evaluate_0.10.1  
-[25] rmarkdown_1.9     labeling_0.3      stringi_1.1.7    
-[28] pillar_1.2.2      compiler_3.4.3    scales_0.5.0     
-[31] backports_1.1.2   R.methodsS3_1.7.1 locfit_1.5-9.1   </code></pre>
+ [1] Rcpp_0.12.16         compiler_3.4.3       pillar_1.2.2        
+ [4] formatR_1.5          git2r_0.21.0         plyr_1.8.4          
+ [7] workflowr_1.0.1      R.methodsS3_1.7.1    R.utils_2.6.0       
+[10] futile.options_1.0.1 tools_3.4.3          digest_0.6.15       
+[13] evaluate_0.10.1      tibble_1.4.2         gtable_0.2.0        
+[16] lattice_0.20-35      rlang_0.2.0          yaml_2.1.18         
+[19] stringr_1.3.0        knitr_1.20           locfit_1.5-9.1      
+[22] rprojroot_1.3-2      rmarkdown_1.9        lambda.r_1.2.2      
+[25] magrittr_1.5         whisker_0.3-2        splines_3.4.3       
+[28] backports_1.1.2      scales_0.5.0         htmltools_0.3.6     
+[31] colorspace_1.3-2     labeling_0.3         stringi_1.1.7       
+[34] lazyeval_0.2.1       munsell_0.4.3        R.oo_1.22.0         </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
