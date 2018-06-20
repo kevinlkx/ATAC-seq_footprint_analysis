@@ -6,4 +6,8 @@ output:
     toc: false
 ---
 
-Welcome to my research website.
+### Compare TF binding between normoxia and hypoxia using CENTIPEDE predictions on ATAC-seq data
+
+* [Compare CENTIPEDE predictions for HIF1A](compare_centipede_predictions_HIF1A.html)
+
+* [Compare CENTIPEDE predictions for CTCF](compare_centipede_predictions_CTCF.html)
