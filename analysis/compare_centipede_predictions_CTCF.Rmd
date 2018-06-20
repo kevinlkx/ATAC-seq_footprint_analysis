@@ -1,5 +1,5 @@
 ---
-title: "Compare CENTIPEDE predictions for CTCF"
+title: "Compare CENTIPEDE predictions for HIF1A"
 author: "Kaixuan Luo"
 date: "6/18/2018"
 output: 
@@ -17,6 +17,33 @@ library(grid)
 library(gridExtra)
 library(limma)
 library(edgeR)
+library(VennDiagram)
+
+message <- futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
+
+## venn diagram
+plot_venn_overlaps <- function(overlaps.m, title = "", col_fill = NULL, category.names = NULL){
+  grid.newpage()
+  overlaps_venn.l <- lapply(as.data.frame(overlaps.m), function(x) which(x == 1))
+  if(is.null(col_fill)){
+    col_fill <-  1:length(overlaps_venn.l)
+  }
+  if(is.null(category.names)){
+    category.names <- names(x)
+  }
+  
+  venn.plot <- venn.diagram( 
+    x = overlaps_venn.l,
+    category.names = category.names, 
+    filename = NULL,
+    fill = col_fill,
+    alpha=rep(0.5, length(overlaps_venn.l)), 
+    cex = 1.5, 
+    cat.fontface=4, 
+    main=title) 
+  grid.draw(venn.plot)
+}
+
 ```
 
 
@@ -92,6 +119,12 @@ cat(length(idx_bound), "sites are bound in at least two samples \n")
 
 cat(length(idx_bound), "(",round(length(idx_bound)/nrow(CentPostPr.df) *100, 2), "% ) sites are bound in at least two samples \n")
 
+
+bound_N <- rowSums(CentPostPr.df[,c("N1", "N2", "N3")] > thresh_PostPr_bound) >= 2
+bound_H <- rowSums(CentPostPr.df[,c("H1", "H2", "H3")] > thresh_PostPr_bound) >= 2
+bound_N_H <- data.frame(N = bound_N, H = bound_H)
+plot_venn_overlaps(bound_N_H, title = paste("Number of", tf_name, "bound sites"), 
+                   category.names = c("Bound in N", "Bound in H"), col_fill = c("blue", "red"))
 
 ```
 
