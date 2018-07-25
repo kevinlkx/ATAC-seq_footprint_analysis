@@ -1,0 +1,130 @@
+---
+title: "ATAC-seq bam files to ATAC-seq data matrices"
+author: "Kaixuan Luo"
+date: "6/13/2018"
+output:
+  workflowr::wflow_html:
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Step 0: Download JASPAR motif database
+Download [JASPAR](http://jaspar.genereg.net) motif database http://jaspar.genereg.net/download/CORE/JASPAR2018_CORE_non-redundant_pfms_meme.zip
+
+Install required softwares:
+
+* [FIMO](http://meme-suite.org/doc/fimo.html?man_type=web) from MEME suite.
+* [samtools](http://www.htslib.org)
+* [bedtools](http://bedtools.readthedocs.io/en/latest/)
+* [bwtools](https://github.com/CRG-Barcelona/bwtool/wiki)
+* [UCSC command-line tools](http://hgdownload.cse.ucsc.edu/admin/exe/): `bedGraphToBigWig`, `bigWigAverageOverBed` 
+
+## Step 1: Find TF motif matches using FIMO
+[script](../code_RCC/fimo_jaspar_motif_rcc.sh)
+```{bash}
+cat code_RCC/fimo_jaspar_motif_rcc.sh
+```
+
+### run
+```{bash eval=FALSE, include=TRUE}
+# match motifs using FIMO ( p-value = 1e-4 ) on RCC
+
+# CTCF MA0139.1
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh CTCF MA0139.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh HIF1A MA1106.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh MEF2D MA0773.1 1e-4
+
+```
+
+## Step 2: Get TF candidate binding sites
+[script](../code_RCC/sites_jaspar_motif_rcc.sh)
+```{bash}
+cat code_RCC/sites_jaspar_motif_rcc.sh
+```
+
+### run
+```{bash eval=FALSE, include=TRUE}
+
+## use the bigWigAverageOverBed tool from UCSC to compute mapablity
+## https://genome.ucsc.edu/goldenpath/help/bigWig.html
+
+## use the bedtools intersect to filter out ENCODE blacklist regions
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh CTCF MA0139.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh HIF1A MA1106.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh MEF2D MA0773.1 1e-4
+
+```
+
+## Step 3: Count ATAC-seq genome-wide cleavage, and build tagcount bigwig file
+[script](../code_RCC/genome_coverage_bamToBigwig.sh)
+```{bash}
+cat code_RCC/genome_coverage_bamToBigwig.sh
+```
+
+### run
+```{bash eval=FALSE, include=TRUE}
+
+## bam files
+bamfiles=("H1_nomito_rdup.bam" "H2_nomito_rdup.bam" "H3_nomito_rdup.bam" "N1_nomito_rdup.bam" "N2_nomito_rdup.bam" "N3_nomito_rdup.bam")
+
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/genome_coverage_bamToBigwig.sh /project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/ATAC-seq_BAMfiles/"${bam_name}"
+done
+
+```
+
+## Step 4: match ATAC-seq tagcount matrices for each motif
+[script](../code_RCC/get_motif_count_matrices.sh)
+```{bash}
+cat code_RCC/get_motif_count_matrices.sh
+```
+
+### run
+```{bash eval=FALSE, include=TRUE}
+
+## bam files
+bamfiles=("H1_nomito_rdup.bam" "H2_nomito_rdup.bam" "H3_nomito_rdup.bam" "N1_nomito_rdup.bam" "N2_nomito_rdup.bam" "N3_nomito_rdup.bam")
+
+## CTCF
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh CTCF MA0139.1 "${bam_name}"
+done
+
+## HIF1A::ARNT
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh HIF1A::ARNT MA0259.1 "${bam_name}"
+done
+
+
+## HIF1A
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh HIF1A MA1106.1 "${bam_name}"
+done
+
+
+## MEF2D
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   sbatch --mem=15G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh MEF2D MA0773.1 "${bam_name}"
+done
+
+```
+
+
