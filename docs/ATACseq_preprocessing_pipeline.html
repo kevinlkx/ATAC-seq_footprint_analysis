@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Kaixuan Luo" />
+
+
+<title>ATAC-seq bam files to ATAC-seq data matrices</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">ATAC-seq analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">ATAC-seq bam files to ATAC-seq data matrices</h1>
+<h4 class="author"><em>Kaixuan Luo</em></h4>
+<h4 class="date"><em>6/13/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-07-25</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180613)</code> </summary></p>
+<p>The command <code>set.seed(20180613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/c8ba1be490a584893ec306468f2e744b59a428bd" target="_blank">c8ba1be</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    code_RCC/.DS_Store
+    Ignored:    data/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/fit_centipede_ATACseq.Rmd
+    Untracked:  code_RCC/.fitCentipede_TF_bams.sbatch.swp
+    Untracked:  data/motifs/
+    Untracked:  data/wgEncodeMapability/
+    Untracked:  docs/figure/compare_centipede_predictions.Rmd/
+    Untracked:  workflow_setup.R
+
+Unstaged changes:
+    Modified:   analysis/index.Rmd
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/c8ba1be490a584893ec306468f2e744b59a428bd/analysis/ATACseq_preprocessing_pipeline.Rmd" target="_blank">c8ba1be</a>
+</td>
+<td style="text-align:left;">
+Kevin Luo
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+add ATAC-seq preprocessing pipeline
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="step-0-download-jaspar-motif-database" class="section level2">
+<h2>Step 0: Download JASPAR motif database</h2>
+<p>Download <a href="http://jaspar.genereg.net">JASPAR</a> motif database <a href="http://jaspar.genereg.net/download/CORE/JASPAR2018_CORE_non-redundant_pfms_meme.zip" class="uri">http://jaspar.genereg.net/download/CORE/JASPAR2018_CORE_non-redundant_pfms_meme.zip</a></p>
+<p>Install required softwares:</p>
+<ul>
+<li><a href="http://meme-suite.org/doc/fimo.html?man_type=web">FIMO</a> from MEME suite.</li>
+<li><a href="http://www.htslib.org">samtools</a></li>
+<li><a href="http://bedtools.readthedocs.io/en/latest/">bedtools</a></li>
+<li><a href="https://github.com/CRG-Barcelona/bwtool/wiki">bwtools</a></li>
+<li><a href="http://hgdownload.cse.ucsc.edu/admin/exe/">UCSC command-line tools</a>: <code>bedGraphToBigWig</code>, <code>bigWigAverageOverBed</code></li>
+</ul>
+</div>
+<div id="step-1-find-tf-motif-matches-using-fimo" class="section level2">
+<h2>Step 1: Find TF motif matches using FIMO</h2>
+<p><a href="../code_RCC/fimo_jaspar_motif_rcc.sh">script</a></p>
+<pre class="bash"><code>cat code_RCC/fimo_jaspar_motif_rcc.sh</code></pre>
+<pre><code>#!/bin/bash
+#SBATCH --job-name=fimo
+#SBATCH --mem=8G
+#SBATCH --output=fimo_%J.out
+#SBATCH --partition=broadwl
+
+##############################################################################
+# get motif matches using FIMO
+#
+# requires FIMO from MEME suite
+# FIMO instructions: http://meme-suite.org/doc/fimo.html?man_type=web
+#installation: http://meme-suite.org/doc/install.html?man_type=web
+##############################################################################
+
+
+## parameters
+tf_name=$1
+pwm_id=$2
+thresh_pValue=$3 # 1e-4
+
+###### example ######
+# tf_name=&quot;CTCF&quot;
+# pwm_id=&quot;MA0139.1&quot;
+# thresh_pValue=1e-4
+#####################
+
+flank=100
+ver_genome=hg19
+max_fimo_sites=1000000
+
+## extract pwm meme file
+echo &quot;pwm_id: $pwm_id, tf_name: $tf_name&quot;
+
+pwm_name=&quot;${tf_name}_${pwm_id}_${thresh_pValue}&quot;
+
+# directory for Jaspar motifs
+dir_pwm=&quot;/project/mstephens/ATAC_DNase/motif_database/JASPAR_2018/JASPAR2018_CORE_non-redundant_pfms_meme&quot;
+pwm_filename=&quot;${dir_pwm}/${pwm_id}.meme&quot;
+
+# reference genome fasta file
+genome_filename=&quot;/project/mstephens/ATAC_DNase/ref_genome/${ver_genome}.fa&quot;
+
+# output directory for FIMO motif matching results
+dir_output=&quot;/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/&quot;
+mkdir -p ${dir_output}
+
+## FIMO matching motifs
+dir_motif_matches=&quot;${dir_output}/FIMO/${pwm_name}&quot;
+filename_motif_matches=&quot;${dir_motif_matches}/fimo.txt&quot;
+
+mkdir -p ${dir_motif_matches}
+echo &quot;Begin FIMO matching motif ...&quot;
+
+fimo --oc ${dir_motif_matches} --verbosity 2 --text \
+    --bgfile --uniform-- --thresh ${thresh_pValue} --max-stored-scores ${max_fimo_sites} \
+    ${pwm_filename} ${genome_filename}  \
+    &gt; ${filename_motif_matches}
+
+echo &quot;Finish FIMO: ${dir_motif_matches}&quot;</code></pre>
+<div id="run" class="section level3">
+<h3>run</h3>
+<pre class="bash"><code># match motifs using FIMO ( p-value = 1e-4 ) on RCC
+
+# CTCF MA0139.1
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh CTCF MA0139.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh HIF1A MA1106.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh MEF2D MA0773.1 1e-4
+</code></pre>
+</div>
+</div>
+<div id="step-2-get-tf-candidate-binding-sites" class="section level2">
+<h2>Step 2: Get TF candidate binding sites</h2>
+<p><a href="../code_RCC/sites_jaspar_motif_rcc.sh">script</a></p>
+<pre class="bash"><code>cat code_RCC/sites_jaspar_motif_rcc.sh</code></pre>
+<pre><code>#!/bin/bash
+#SBATCH --job-name=sites
+#SBATCH --mem=8G
+#SBATCH --output=sites_%J.out
+#SBATCH --partition=broadwl
+
+
+################################################################################
+# The script process FIMO motif matches to get candidate binding sites
+#
+# requires process_pwm_sites.R to flank motif matches to get candidate sites
+# requires bigWigAverageOverBed tool from UCSC to compute mapablity
+# requires bedtools to filter out ENCODE blacklist regions
+################################################################################
+
+module load R
+
+## parameters
+tf_name=$1
+pwm_id=$2
+thresh_pValue=$3 # 1e-4
+
+###### example ######
+# tf_name=&quot;CTCF&quot;
+# pwm_id=&quot;MA0139.1&quot;
+# thresh_pValue=1e-4
+#####################
+
+flank=100
+ver_genome=hg19
+max_fimo_sites=1000000
+
+## extract pwm meme file
+echo &quot;pwm_id: $pwm_id, tf_name: $tf_name&quot;
+
+pwm_name=&quot;${tf_name}_${pwm_id}_${thresh_pValue}&quot;
+
+dir_code=$HOME/projects/ATAC-seq/ATAC-seq_workflow/code_RCC
+
+# directory for ENCODE mapability blacklist
+dir_blacklist=&quot;/project/mstephens/ATAC_DNase/ENCODE_blacklist/hg19&quot;
+
+# output directory for FIMO motif matching results
+dir_output=&quot;/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/&quot;
+mkdir -p ${dir_output}
+
+## FIMO matching motifs
+dir_motif_matches=&quot;${dir_output}/FIMO/${pwm_name}&quot;
+filename_motif_matches=&quot;${dir_motif_matches}/fimo.txt&quot;
+
+## get candidate sites after taking flanking windows around motif matches
+
+# output directory for candidate sites
+dir_sites=&quot;${dir_output}/candidate_sites/${thresh_pValue}&quot;
+mkdir -p ${dir_sites}
+
+sites=&quot;${dir_sites}/${pwm_name}_flank${flank}_fimo_sites.bed&quot;
+
+## mapability downloaded from http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/
+echo &quot;Flank motif sites and compute mapability...&quot;
+filename_mapability=&quot;${dir_blacklist}/wgEncodeDukeMapabilityUniqueness20bp.bigWig&quot;
+Rscript ${dir_code}/process_pwm_sites.R ${tf_name} ${pwm_id} ${filename_motif_matches} ${flank} ${thresh_pValue} ${dir_sites} ${filename_mapability}
+
+## filter ENCODE blacklist regions
+echo &quot;Filter ENCODE blacklist regions...&quot;
+blacklist_filename=&quot;${dir_blacklist}/wgEncodeDacMapabilityConsensusExcludable.bed&quot;
+bedtools intersect -v -a ${sites} -b ${blacklist_filename} &gt; ${sites}.filtered.tmp
+head -1 ${sites} | cat - ${sites}.filtered.tmp &gt; ${sites}.filtered
+mv ${sites}.filtered ${sites}
+rm ${sites}.filtered.tmp
+
+echo &quot;Complete candidate sites processing.&quot;</code></pre>
+<div id="run-1" class="section level3">
+<h3>run</h3>
+<pre class="bash"><code>
+## use the bigWigAverageOverBed tool from UCSC to compute mapablity
+## https://genome.ucsc.edu/goldenpath/help/bigWig.html
+
+## use the bedtools intersect to filter out ENCODE blacklist regions
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh CTCF MA0139.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh HIF1A MA1106.1 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh MEF2D MA0773.1 1e-4
+</code></pre>
+</div>
+</div>
+<div id="step-3-count-atac-seq-genome-wide-cleavage-and-build-tagcount-bigwig-file" class="section level2">
+<h2>Step 3: Count ATAC-seq genome-wide cleavage, and build tagcount bigwig file</h2>
+<p><a href="../code_RCC/genome_coverage_bamToBigwig.sh">script</a></p>
+<pre class="bash"><code>cat code_RCC/genome_coverage_bamToBigwig.sh</code></pre>
+<pre><code>#!/bin/bash
+
+#SBATCH --job-name=coverage
+#SBATCH --output=coverage_%J.out
+#SBATCH --mem=10G
+#SBATCH --partition=broadwl
+
+################################################################################
+# get 5&#39; end coverage for bam files
+# Compute the DNase or ATAC-seq cleavage (5&#39; end) coverge along the genome
+#
+# requires samtools, bedtools, and bedGraphToBigWig (from UCSC)
+################################################################################
+
+bam_file=$1
+
+dir_results=&quot;/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_tagcounts/&quot;
+
+echo &quot;Compute genome coverage for ${bam_file}&quot;
+echo &quot;Output directory: ${dir_results}&quot;
+
+## fetch chrom size from UCSC
+# ver_genome=&quot;hg19&quot;
+# echo &quot;fetch chrom size for ${ver_genome}&quot;
+# mkdir -p &quot;${dir_results}/genome_size/&quot;
+# genome_chrom_sizes=&quot;${dir_results}/genome_size/${ver_genome}.chrom.sizes&quot;
+# fetchChromSizes ${ver_genome} &gt; ${genome_chrom_sizes}
+
+## or download from UCSC
+# cd ${dir_results}/genome_size/
+# wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes
+
+genome_chrom_sizes=&quot;/project/compbio/jointLCLs/reference_genomes/hg19/hg19.chrom.sizes&quot;
+
+## sort bam file
+bam_dir_name=$(dirname ${bam_file})
+bam_basename=$(basename ${bam_file} .bam)
+
+cd ${bam_dir_name}
+
+echo &quot;base bamfile: ${bam_basename}&quot;
+echo &quot;sort and index bam file&quot;
+
+samtools sort -o ${bam_basename}.sorted.bam ${bam_basename}.bam
+
+samtools index ${bam_basename}.sorted.bam
+
+samtools idxstats ${bam_basename}.sorted.bam &gt; ${bam_basename}.idxstats.txt
+
+bam_sorted_name=&quot;${bam_dir_name}/${bam_basename}.sorted.bam&quot;
+
+## count genome coverage, 5&#39; end, save in bedGraph format, then convert to bigWig format
+
+bw_file=&quot;${dir_results}/${bam_basename}.5p.0base.tagcount&quot;
+
+## forward strand
+echo &quot;Count genome coverage on + strand&quot;
+samtools view -b ${bam_sorted_name} | \
+genomeCoverageBed -bg -5 -strand &quot;+&quot; -ibam stdin -g ${genome_chrom_sizes} &gt; ${bw_file}.bedGraph
+
+echo &quot;coverting bedGraph to BigWig...&quot;
+sort -k1,1 -k2,2n ${bw_file}.bedGraph &gt; ${bw_file}.sorted.bedGraph
+bedGraphToBigWig ${bw_file}.sorted.bedGraph ${genome_chrom_sizes} ${bw_file}.fwd.bw
+rm ${bw_file}.bedGraph ${bw_file}.sorted.bedGraph
+
+## reverse strand
+echo &quot;Count genome coverage on - strand&quot;
+samtools view -b ${bam_sorted_name} | \
+genomeCoverageBed -bg -5 -strand &quot;-&quot; -ibam stdin -g ${genome_chrom_sizes} &gt; ${bw_file}.bedGraph
+
+echo &quot;coverting bedGraph to BigWig...&quot;
+sort -k1,1 -k2,2n ${bw_file}.bedGraph &gt; ${bw_file}.sorted.bedGraph
+bedGraphToBigWig ${bw_file}.sorted.bedGraph ${genome_chrom_sizes} ${bw_file}.rev.bw
+rm ${bw_file}.bedGraph ${bw_file}.sorted.bedGraph
+
+echo &quot;Finished computing genome coverage =&gt; ${bw_file}.bw&quot;</code></pre>
+<div id="run-2" class="section level3">
+<h3>run</h3>
+<pre class="bash"><code>
+## bam files
+bamfiles=(&quot;H1_nomito_rdup.bam&quot; &quot;H2_nomito_rdup.bam&quot; &quot;H3_nomito_rdup.bam&quot; &quot;N1_nomito_rdup.bam&quot; &quot;N2_nomito_rdup.bam&quot; &quot;N3_nomito_rdup.bam&quot;)
+
+for bam_name in &quot;${bamfiles[@]}&quot;
+do
+   echo &quot;${bam_name}&quot;
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/genome_coverage_bamToBigwig.sh /project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/ATAC-seq_BAMfiles/&quot;${bam_name}&quot;
+done
+</code></pre>
+</div>
+</div>
+<div id="step-4-match-atac-seq-tagcount-matrices-for-each-motif" class="section level2">
+<h2>Step 4: match ATAC-seq tagcount matrices for each motif</h2>
+<p><a href="../code_RCC/get_motif_count_matrices.sh">script</a></p>
+<pre class="bash"><code>cat code_RCC/get_motif_count_matrices.sh</code></pre>
+<pre><code>#!/bin/bash
+
+#SBATCH --job-name=extract_counts
+#SBATCH --output=extract_counts_%J.out
+#SBATCH --partition=broadwl
+#SBATCH --mem=8G
+
+################################################################################
+# The script takes bigwig files of DNase or ATAC-seq genome-wide count coverages
+# then, it extracts tagcounts for a TF with 100bp flanks around motif
+# and save in a tagcount matrix.
+#
+# requires bigwig tagcount files (in the earlier step)
+# requires bwtool to extract counts from bigwig files
+# requires rev_tagcount_bwtool.R to reverse counts on reverse strand
+################################################################################
+
+module load R
+
+tf_name=$1
+pwm_id=$2
+bam_name=$3
+
+thresh_pValue=&quot;1e-4&quot;
+flank=100
+ver_genome=&quot;hg19&quot;
+
+pwm_name=&quot;${tf_name}_${pwm_id}_${thresh_pValue}&quot;
+
+dir_code=$HOME/projects/ATAC-seq/ATAC-seq_workflow/code_RCC
+dir_tagcounts=/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_tagcounts/
+dir_count_matrix=/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_count_matrix/${pwm_name}/
+dir_sites=/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/candidate_sites/${thresh_pValue}/
+filename_sites=${dir_sites}/${pwm_name}_flank${flank}_fimo_sites.bed
+
+echo &quot;PWM name: ${pwm_name}&quot;
+echo &quot;Candidate sites: ${filename_sites}&quot;
+echo &quot;Bam filename: ${bam_name}&quot;
+
+## Extract counts around motif matches into tagcount matrices
+## Check the existence of tagcount bigwig files and candidate sites
+bam_basename=$(basename ${bam_name} .bam)
+bw_file=&quot;${dir_tagcounts}/${bam_basename}.5p.0base.tagcount&quot;
+file_tagcount_fwd=${bw_file}.fwd.bw
+file_tagcount_rev=${bw_file}.rev.bw
+echo &quot;Tagcount fwd name: ${file_tagcount_fwd}&quot;
+echo &quot;Tagcount rev name: ${file_tagcount_rev}&quot;
+
+if [ ! -s ${file_tagcount_fwd} ] || [ ! -s ${file_tagcount_rev} ]; then
+  echo &quot;ERROR: Tagcount bigwig files for: ${bam_name} does not exist!&quot;
+elif [ ! -s ${filename_sites} ]; then
+  echo &quot;ERROR: Candidate sites ${filename_sites} does not exist!&quot;
+else
+
+  echo &quot;Counting cuts around the candidate sites of ${pwm_name} with ${flank}bp flanking windows ...&quot;
+
+  mkdir -p ${dir_count_matrix}
+
+  file_count_matrix_fwd=&quot;${dir_count_matrix}/${pwm_name}_${bam_basename}_fwdcounts.m&quot;
+  file_count_matrix_rev=&quot;${dir_count_matrix}/${pwm_name}_${bam_basename}_revcounts.m&quot;
+
+  ## count matrix around the candidate sites
+  echo &quot;match matrix of ${file_count_matrix_fwd} ...&quot;
+  cut -f 1-4 ${filename_sites} | bwtool extract bed stdin ${file_tagcount_fwd} ${file_count_matrix_fwd} -fill=0 -decimals=0 -tabs
+
+  echo &quot;match matrix of ${file_count_matrix_rev} ...&quot;
+  cut -f 1-4 ${filename_sites} | bwtool extract bed stdin ${file_tagcount_rev} ${file_count_matrix_rev} -fill=0 -decimals=0 -tabs
+
+  Rscript ${dir_code}/rev_tagcount_bwtool.R ${file_count_matrix_fwd} ${file_count_matrix_rev} ${filename_sites}
+
+  # compress the files to .gz
+  gzip -f ${file_count_matrix_fwd} ${file_count_matrix_rev}
+  echo &quot;Finished counting for ${pwm_name} in ${bam_name}.&quot;
+
+fi</code></pre>
+<div id="run-3" class="section level3">
+<h3>run</h3>
+<pre class="bash"><code>
+## bam files
+bamfiles=(&quot;H1_nomito_rdup.bam&quot; &quot;H2_nomito_rdup.bam&quot; &quot;H3_nomito_rdup.bam&quot; &quot;N1_nomito_rdup.bam&quot; &quot;N2_nomito_rdup.bam&quot; &quot;N3_nomito_rdup.bam&quot;)
+
+## CTCF
+for bam_name in &quot;${bamfiles[@]}&quot;
+do
+   echo &quot;${bam_name}&quot;
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh CTCF MA0139.1 &quot;${bam_name}&quot;
+done
+
+## HIF1A::ARNT
+for bam_name in &quot;${bamfiles[@]}&quot;
+do
+   echo &quot;${bam_name}&quot;
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh HIF1A::ARNT MA0259.1 &quot;${bam_name}&quot;
+done
+
+
+## HIF1A
+for bam_name in &quot;${bamfiles[@]}&quot;
+do
+   echo &quot;${bam_name}&quot;
+   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh HIF1A MA1106.1 &quot;${bam_name}&quot;
+done
+
+
+## MEF2D
+for bam_name in &quot;${bamfiles[@]}&quot;
+do
+   echo &quot;${bam_name}&quot;
+   sbatch --mem=15G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh MEF2D MA0773.1 &quot;${bam_name}&quot;
+done
+</code></pre>
+</div>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.3.3 (2017-03-06)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: macOS  10.13.4
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] workflowr_1.0.1   Rcpp_0.12.14      digest_0.6.13    
+ [4] rprojroot_1.3-2   R.methodsS3_1.7.1 backports_1.1.2  
+ [7] git2r_0.21.0      magrittr_1.5      evaluate_0.10.1  
+[10] stringi_1.1.5     whisker_0.3-2     R.oo_1.21.0      
+[13] R.utils_2.6.0     rmarkdown_1.9     tools_3.3.3      
+[16] stringr_1.2.0     yaml_2.1.16       htmltools_0.3.6  
+[19] knitr_1.18       </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
