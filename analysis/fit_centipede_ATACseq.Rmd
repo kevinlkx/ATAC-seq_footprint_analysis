@@ -1,0 +1,55 @@
+---
+title: "Fit CENTIPEDE model to ATAC-seq data"
+author: "Kaixuan Luo"
+date: "6/13/2018"
+output:
+  workflowr::wflow_html:
+    toc: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Fit CENTIPEDE model with ATAC-seq count matrices and PWM scores
+
+### scripts
+
+* [fitCentipede_ATAC-seq_counts.R](../code_RCC/fitCentipede_ATAC-seq_counts.R)
+* [fitCentipede_TF_bams.sh](../code_RCC/fitCentipede_TF_bams.sh)
+
+### runs
+```{bash eval=FALSE, include=TRUE}
+bamfiles=("H1_nomito_rdup.bam" "H2_nomito_rdup.bam" "H3_nomito_rdup.bam" "N1_nomito_rdup.bam" "N2_nomito_rdup.bam" "N3_nomito_rdup.bam")
+
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   Rscript ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_ATAC-seq_counts.R CTCF MA0139.1 "${bam_name}" 0.8 0 1e-4
+done
+
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   Rscript ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_ATAC-seq_counts.R HIF1A MA1106.1 "${bam_name}" 0.8 0 1e-4
+done
+
+for bam_name in "${bamfiles[@]}"
+do
+   echo "${bam_name}"
+   Rscript ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_ATAC-seq_counts.R MEF2D MA0773.1 "${bam_name}" 0.8 0 1e-4
+done
+```
+
+### sbatch runs on RCC
+```{bash eval=FALSE, include=TRUE}
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh CTCF MA0139.1 0.8 0 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh HIF1A MA1106.1 0.8 0 1e-4
+
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh MEF2D MA0773.1 0.8 0 1e-4
+
+
+```
+
