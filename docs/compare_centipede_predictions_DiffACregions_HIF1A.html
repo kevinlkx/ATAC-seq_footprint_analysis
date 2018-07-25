@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Kaixuan Luo" />
+
+
+<title>Compare CENTIPEDE predictions for CTCF for regions that differentially open between hypoxia vs. normoxia</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">ATAC-seq analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/jdblischak/workflowr">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Compare CENTIPEDE predictions for CTCF for regions that differentially open between hypoxia vs. normoxia</h1>
+<h4 class="author"><em>Kaixuan Luo</em></h4>
+<h4 class="date"><em>7/25/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-07-25</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180613)</code> </summary></p>
+<p>The command <code>set.seed(20180613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/cbd5c0ba56055674d12fb8270f128838d59d0b96" target="_blank">cbd5c0b</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    code_RCC/.DS_Store
+    Ignored:    data/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/compare_centipede_predictions_DiffACregions_CTCF.Rmd
+    Untracked:  data/motifs/
+    Untracked:  data/wgEncodeMapability/
+    Untracked:  docs/figure/compare_centipede_predictions.Rmd/
+    Untracked:  docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/
+    Untracked:  workflow_setup.R
+
+Unstaged changes:
+    Modified:   analysis/ATACseq_preprocessing_pipeline.Rmd
+    Modified:   analysis/compare_centipede_predictions_HIF1A.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   code_RCC/fitCentipede_ATAC-seq_counts.R
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/cbd5c0ba56055674d12fb8270f128838d59d0b96/analysis/compare_centipede_predictions_DiffACregions_HIF1A.Rmd" target="_blank">cbd5c0b</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+compare centipede predictions for HIF1A in DiffAC regions
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<pre class="r"><code>library(ggplot2)
+library(grid)
+library(gridExtra)
+suppressPackageStartupMessages(library(GenomicRanges))
+library(limma)</code></pre>
+<pre><code>
+Attaching package: &#39;limma&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:BiocGenerics&#39;:
+
+    plotMA</code></pre>
+<pre class="r"><code>library(edgeR)
+library(VennDiagram)</code></pre>
+<pre><code>Loading required package: futile.logger</code></pre>
+<pre class="r"><code>message &lt;- futile.logger::flog.threshold(futile.logger::ERROR, name = &quot;VennDiagramLogger&quot;)
+
+## venn diagram
+plot_venn_overlaps &lt;- function(overlaps.m, title = &quot;&quot;, col_fill = NULL, category.names = NULL){
+  grid.newpage()
+  overlaps_venn.l &lt;- lapply(as.data.frame(overlaps.m), function(x) which(x == 1))
+  if(is.null(col_fill)){
+    col_fill &lt;-  1:length(overlaps_venn.l)
+  }
+  if(is.null(category.names)){
+    category.names &lt;- names(x)
+  }
+  
+  venn.plot &lt;- venn.diagram( 
+    x = overlaps_venn.l,
+    category.names = category.names, 
+    filename = NULL,
+    fill = col_fill,
+    alpha=rep(0.5, length(overlaps_venn.l)), 
+    cex = 1.5, 
+    cat.fontface=4, 
+    main=title) 
+  grid.draw(venn.plot)
+}</code></pre>
+<div id="parameters" class="section level2">
+<h2>parameters</h2>
+<pre class="r"><code>tf_name &lt;- &quot;HIF1A&quot;
+pwm_name &lt;- &quot;HIF1A_MA1106.1_1e-4&quot;
+
+thresh_PostPr_bound &lt;- 0.99
+cat(pwm_name, &quot;\n&quot;)</code></pre>
+<pre><code>HIF1A_MA1106.1_1e-4 </code></pre>
+<pre class="r"><code>flank &lt;- 100</code></pre>
+</div>
+<div id="load-diff-accessibility-test-results-comparing-hypoxia-vs.normoxia." class="section level2">
+<h2>load diff accessibility test results, comparing hypoxia vs. normoxia.</h2>
+<ul>
+<li>log fold change &gt; 0 indicates differentially open in hypoxia.</li>
+<li>log fold change &lt; 0 indicates differentially open in normoxia.</li>
+</ul>
+<pre class="r"><code>diffAC_regions.df &lt;- read.csv(&quot;~/Dropbox/research/ATAC_DNase/ATAC-seq_Olivia_Gray/results/DiffAC_regions/ordered_results_withcoords.csv&quot;)
+
+cat(nrow(diffAC_regions.df), &quot;regions in total \n&quot;)</code></pre>
+<pre><code>138927 regions in total </code></pre>
+<pre class="r"><code>diffAC_regions.df &lt;- diffAC_regions.df[, c(&quot;chr&quot;, &quot;Start&quot;, &quot;End&quot;,&quot;GeneID&quot;, &quot;baseMean&quot;, &quot;Strand&quot;,  &quot;log2FoldChange&quot;, &quot;lfcSE&quot;, &quot;stat&quot;, &quot;pvalue&quot;, &quot;padj&quot;)]
+
+diffAC_sig_regions.df &lt;- diffAC_regions.df[diffAC_regions.df$padj &lt; 0.1, ]
+cat(nrow(diffAC_sig_regions.df), &quot;significant regions \n&quot;)</code></pre>
+<pre><code>2390 significant regions </code></pre>
+<pre class="r"><code>hist(diffAC_regions.df$log2FoldChange, xlab = &quot;log2FoldChange&quot;, main = &quot;Differentially open regions (FDR &lt; 10%)&quot;)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>diffAC_sigH_regions.df &lt;- diffAC_sig_regions.df[diffAC_sig_regions.df$log2FoldChange &gt; 0, ]
+cat(nrow(diffAC_sigH_regions.df), &quot;regions differentially open in hypoxia. \n&quot;)</code></pre>
+<pre><code>201 regions differentially open in hypoxia. </code></pre>
+<pre class="r"><code>diffAC_sigN_regions.df &lt;- diffAC_sig_regions.df[diffAC_sig_regions.df$log2FoldChange &lt; 0, ]
+cat(nrow(diffAC_sigN_regions.df), &quot;regions differentially open in normoxia. \n&quot;)</code></pre>
+<pre><code>2189 regions differentially open in normoxia. </code></pre>
+<pre class="r"><code>diffAC_sig_regions.gr &lt;- makeGRangesFromDataFrame(diffAC_sig_regions.df, start.field = &quot;Start&quot;, end.field = &quot;End&quot;, keep.extra.columns = T)
+
+diffAC_sigH_regions.gr &lt;- makeGRangesFromDataFrame(diffAC_sigH_regions.df, start.field = &quot;Start&quot;, end.field = &quot;End&quot;, keep.extra.columns = T)
+
+diffAC_sigN_regions.gr &lt;- makeGRangesFromDataFrame(diffAC_sigN_regions.df, start.field = &quot;Start&quot;, end.field = &quot;End&quot;, keep.extra.columns = T)</code></pre>
+</div>
+<div id="load-centipede-predictions" class="section level2">
+<h2>load CENTIPEDE predictions</h2>
+<pre class="r"><code>dir_predictions &lt;- paste0(&quot;~/Dropbox/research/ATAC_DNase/ATAC-seq_Olivia_Gray/results/centipede_predictions/&quot;, pwm_name)
+
+## condition: N
+bam_namelist_N &lt;- c(&quot;N1_nomito_rdup.bam&quot;, &quot;N2_nomito_rdup.bam&quot;, &quot;N3_nomito_rdup.bam&quot;)
+
+site_predictions_N.l &lt;- vector(&quot;list&quot;, 3)
+names(site_predictions_N.l) &lt;- bam_namelist_N
+
+for(i in 1:length(bam_namelist_N)){
+  bam_basename &lt;- tools::file_path_sans_ext(basename(bam_namelist_N[[i]]))
+  site_predictions_N.l[[i]] &lt;- read.table(paste0(dir_predictions, &quot;/&quot;, pwm_name, &quot;_&quot;, bam_basename, &quot;_predictions.txt&quot;), header = T, stringsAsFactors = F)
+}
+
+CentPostPr_N.df &lt;- data.frame(N1 = site_predictions_N.l[[1]]$CentPostPr, 
+                              N2 = site_predictions_N.l[[2]]$CentPostPr, 
+                              N3 = site_predictions_N.l[[3]]$CentPostPr)
+
+CentLogRatios_N.df &lt;- data.frame(N1 = site_predictions_N.l[[1]]$CentLogRatios, 
+                                 N2 = site_predictions_N.l[[2]]$CentLogRatios, 
+                                 N3 = site_predictions_N.l[[3]]$CentLogRatios)
+
+## condition: H
+bam_namelist_H &lt;- c(&quot;H1_nomito_rdup.bam&quot;, &quot;H2_nomito_rdup.bam&quot;, &quot;H3_nomito_rdup.bam&quot;)
+
+site_predictions_H.l &lt;- vector(&quot;list&quot;, 3)
+names(site_predictions_H.l) &lt;- bam_namelist_H
+
+for(i in 1:length(bam_namelist_H)){
+  bam_basename &lt;- tools::file_path_sans_ext(basename(bam_namelist_H[[i]]))
+  site_predictions_H.l[[i]] &lt;- read.table(paste0(dir_predictions, &quot;/&quot;, pwm_name, &quot;_&quot;, bam_basename, &quot;_predictions.txt&quot;), header = T, stringsAsFactors = F)
+}
+
+CentPostPr_H.df &lt;- data.frame(H1 = site_predictions_H.l[[1]]$CentPostPr, 
+                              H2 = site_predictions_H.l[[2]]$CentPostPr, 
+                              H3 = site_predictions_H.l[[3]]$CentPostPr)
+
+CentLogRatios_H.df &lt;- data.frame(H1 = site_predictions_H.l[[1]]$CentLogRatios, 
+                                 H2 = site_predictions_H.l[[2]]$CentLogRatios, 
+                                 H3 = site_predictions_H.l[[3]]$CentLogRatios)
+
+if(any(site_predictions_N.l[[1]]$name != site_predictions_H.l[[1]]$name)){
+  stop(&quot;sites not match!&quot;)
+}
+
+sites.df &lt;- site_predictions_N.l[[1]][,1:7]
+
+## get motif coordinates
+if(sites.df[1, &quot;end&quot;] - sites.df[1, &quot;start&quot;] &gt; flank){
+  sites.df$start &lt;- sites.df$start + flank
+  sites.df$end &lt;- sites.df$end - flank
+}
+
+
+sites.gr &lt;- makeGRangesFromDataFrame(sites.df, start.field = &quot;start&quot;, end.field = &quot;end&quot;, keep.extra.columns = F)
+
+
+CentPostPr.df &lt;- cbind(CentPostPr_N.df, CentPostPr_H.df)
+CentLogRatios.df &lt;- cbind(CentLogRatios_N.df, CentLogRatios_H.df)
+
+sites_CentPostPr.df &lt;- cbind(sites.df, CentPostPr_N.df, CentPostPr_H.df)
+sites_CentLogRatios.df &lt;- cbind(sites.df, CentLogRatios_N.df, CentLogRatios_H.df)</code></pre>
+</div>
+<div id="intersect-centipede-sites-with-diffac-regions" class="section level2">
+<h2>intersect CENTIPEDE sites with diffAC regions</h2>
+<pre class="r"><code>overlaps_diffAC.df &lt;- as.data.frame(findOverlaps(query = sites.gr, subject = diffAC_sig_regions.gr, type = &quot;within&quot;, ignore.strand = T))
+idx_sites_diffAC &lt;- unique(overlaps_diffAC.df$queryHits)
+cat(length(idx_sites_diffAC), &quot;candidate motif sites differentially open in hypoxia or normoxia. \n&quot;)</code></pre>
+<pre><code>101 candidate motif sites differentially open in hypoxia or normoxia. </code></pre>
+<pre class="r"><code>overlaps_sigH.df &lt;- as.data.frame(findOverlaps(query = sites.gr, subject = diffAC_sigH_regions.gr, type = &quot;within&quot;, ignore.strand = T))
+idx_sites_sigH &lt;- unique(overlaps_sigH.df$queryHits)
+
+cat(length(idx_sites_sigH), &quot;candidate motif sites differentially open in hypoxia. \n&quot;)</code></pre>
+<pre><code>22 candidate motif sites differentially open in hypoxia. </code></pre>
+<pre class="r"><code>overlaps_sigN.df &lt;- as.data.frame(findOverlaps(query = sites.gr, subject = diffAC_sigN_regions.gr, type = &quot;within&quot;, ignore.strand = T))
+idx_sites_sigN &lt;- unique(overlaps_sigN.df$queryHits)
+
+cat(length(idx_sites_sigN), &quot;candidate motif sites differentially open in normoxia. \n&quot;)</code></pre>
+<pre><code>79 candidate motif sites differentially open in normoxia. </code></pre>
+</div>
+<div id="binarize-to-bound-and-unbound" class="section level2">
+<h2>binarize to bound and unbound</h2>
+<pre class="r"><code>cat(&quot;Number of bound sites that are differentially open in hypoxia: \n&quot;)</code></pre>
+<pre><code>Number of bound sites that are differentially open in hypoxia: </code></pre>
+<pre class="r"><code>colSums(CentPostPr.df[idx_sites_sigH, ] &gt; thresh_PostPr_bound)</code></pre>
+<pre><code>N1 N2 N3 H1 H2 H3 
+14 12  9 21 18 22 </code></pre>
+<pre class="r"><code>cat(&quot;Number of bound sites that are differentially open in normoxia: \n&quot;)</code></pre>
+<pre><code>Number of bound sites that are differentially open in normoxia: </code></pre>
+<pre class="r"><code>colSums(CentPostPr.df[idx_sites_sigN, ] &gt; thresh_PostPr_bound)</code></pre>
+<pre><code>N1 N2 N3 H1 H2 H3 
+79 79 78 45 36 53 </code></pre>
+</div>
+<div id="average-binding-probablity-and-average-logratios" class="section level2">
+<h2>Average binding probablity and average logRatios</h2>
+<div id="all-motif-sites" class="section level3">
+<h3>all motif sites</h3>
+<pre class="r"><code># binding probablity
+par(pty=&quot;s&quot;)
+plot(rowMeans(CentPostPr_N.df), rowMeans(CentPostPr_H.df), 
+     xlab = &quot;N average P(Bound)&quot;, ylab = &quot;H average P(Bound)&quot;, main = tf_name,
+     pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
+abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># logRatios
+par(mfrow = c(1,2))
+par(pty=&quot;s&quot;)
+plot(rowMeans(CentLogRatios_N.df), rowMeans(CentLogRatios_H.df), 
+     xlab = &quot;N average logRatios&quot;, ylab = &quot;H average logRatios&quot;, main = tf_name, 
+     pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
+abline(a=0,b=1,col = &quot;darkgray&quot;)
+
+plot(x = (rowMeans(CentLogRatios_H.df)+rowMeans(CentLogRatios_N.df))/2, 
+     y = rowMeans(CentLogRatios_H.df) - rowMeans(CentLogRatios_N.df),
+     xlab = &quot;average logRatios&quot;, ylab = &quot;Difference in logRatios (H - N)&quot;, main = tf_name,
+     pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
+abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sites-that-are-differentially-open-in-hypoxia" class="section level3">
+<h3>sites that are differentially open in hypoxia</h3>
+<pre class="r"><code>cat(length(idx_sites_sigH), &quot;candidate motif sites differentially open in hypoxia. \n&quot;)</code></pre>
+<pre><code>22 candidate motif sites differentially open in hypoxia. </code></pre>
+<pre class="r"><code># binding probablity
+par(pty=&quot;s&quot;)
+plot(rowMeans(CentPostPr_N.df[idx_sites_sigH,]), rowMeans(CentPostPr_H.df[idx_sites_sigH,]), 
+     xlab = &quot;N average P(Bound)&quot;, ylab = &quot;H average P(Bound)&quot;, main = paste(tf_name, &quot;bound sites&quot;),
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># logRatios
+par(mfrow = c(1,2))
+par(pty=&quot;s&quot;)
+plot(rowMeans(CentLogRatios_N.df[idx_sites_sigH,]), rowMeans(CentLogRatios_H.df[idx_sites_sigH,]), 
+     xlab = &quot;N average logRatios&quot;, ylab = &quot;H average logRatios&quot;, main = tf_name, 
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0,b=1,col = &quot;darkgray&quot;)
+
+plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigH,])+rowMeans(CentLogRatios_N.df[idx_sites_sigH,]))/2, 
+     y = rowMeans(CentLogRatios_H.df[idx_sites_sigH,]) - rowMeans(CentLogRatios_N.df[idx_sites_sigH,]),
+     xlab = &quot;average logRatios&quot;, ylab = &quot;Difference in logRatios (H - N)&quot;, main = tf_name,
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="sites-that-are-differentially-open-in-normoxia" class="section level3">
+<h3>sites that are differentially open in normoxia</h3>
+<pre class="r"><code>cat(length(idx_sites_sigN), &quot;candidate motif sites differentially open in normoxia \n&quot;)</code></pre>
+<pre><code>79 candidate motif sites differentially open in normoxia </code></pre>
+<pre class="r"><code># binding probablity
+par(pty=&quot;s&quot;)
+plot(rowMeans(CentPostPr_N.df[idx_sites_sigN,]), rowMeans(CentPostPr_H.df[idx_sites_sigN,]), 
+     xlab = &quot;N average P(Bound)&quot;, ylab = &quot;H average P(Bound)&quot;, main = paste(tf_name, &quot;bound sites&quot;),
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># logRatios
+par(mfrow = c(1,2))
+par(pty=&quot;s&quot;)
+plot(rowMeans(CentLogRatios_N.df[idx_sites_sigN,]), rowMeans(CentLogRatios_H.df[idx_sites_sigN,]), 
+     xlab = &quot;N average logRatios&quot;, ylab = &quot;H average logRatios&quot;, main = tf_name, 
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0,b=1,col = &quot;darkgray&quot;)
+
+plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigN,])+rowMeans(CentLogRatios_N.df[idx_sites_sigN,]))/2, 
+     y = rowMeans(CentLogRatios_H.df[idx_sites_sigN,]) - rowMeans(CentLogRatios_N.df[idx_sites_sigN,]),
+     xlab = &quot;average logRatios&quot;, ylab = &quot;Difference in logRatios (H - N)&quot;, main = tf_name,
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="compare-logratios-for-differentially-accessible-sites-using-limma" class="section level2">
+<h2>Compare logRatios for differentially accessible sites using limma</h2>
+<pre class="r"><code>targets &lt;- data.frame(bam = c(bam_namelist_N, bam_namelist_H), 
+                      label = colnames(CentLogRatios.df), 
+                      condition = rep(c(&quot;N&quot;, &quot;H&quot;), each = 3))
+
+print(targets)</code></pre>
+<pre><code>                 bam label condition
+1 N1_nomito_rdup.bam    N1         N
+2 N2_nomito_rdup.bam    N2         N
+3 N3_nomito_rdup.bam    N3         N
+4 H1_nomito_rdup.bam    H1         H
+5 H2_nomito_rdup.bam    H2         H
+6 H3_nomito_rdup.bam    H3         H</code></pre>
+<pre class="r"><code>condition &lt;- factor(targets$condition, levels = c(&quot;N&quot;, &quot;H&quot;))
+design &lt;- model.matrix(~0+condition)
+colnames(design) &lt;- levels(condition)
+print(design)</code></pre>
+<pre><code>  N H
+1 1 0
+2 1 0
+3 1 0
+4 0 1
+5 0 1
+6 0 1
+attr(,&quot;assign&quot;)
+[1] 1 1
+attr(,&quot;contrasts&quot;)
+attr(,&quot;contrasts&quot;)$condition
+[1] &quot;contr.treatment&quot;</code></pre>
+<pre class="r"><code>CentLogRatios_diffAC.df &lt;- CentLogRatios.df[idx_sites_diffAC, ]
+
+fit &lt;- lmFit(CentLogRatios_diffAC.df, design)
+contrasts &lt;- makeContrasts(H-N, levels=design)
+fit2 &lt;- contrasts.fit(fit, contrasts)
+fit2 &lt;- eBayes(fit2, trend=TRUE)
+num_diffbind &lt;- summary(decideTests(fit2))
+
+percent_diffbind &lt;- round(num_diffbind / sum(num_diffbind) * 100, 2)
+
+cat(num_diffbind[1], &quot;sites differentially open in normoxia (&quot;, percent_diffbind[1], &quot;%) \n&quot;, 
+    num_diffbind[3], &quot;sites differentially open in hypoxia (&quot;, percent_diffbind[3], &quot;%) \n&quot;,
+    num_diffbind[2], &quot;sites not significantly different (&quot;, percent_diffbind[2], &quot;%) \n&quot;)</code></pre>
+<pre><code>79 sites differentially open in normoxia ( 78.22 %) 
+ 14 sites differentially open in hypoxia ( 13.86 %) 
+ 8 sites not significantly different ( 7.92 %) </code></pre>
+<pre class="r"><code># volcanoplot(fit2, main=&quot;H vs. N&quot;, xlab = &quot;Difference in logRatios (H - N)&quot;)
+
+plot(x = fit2$coef, y = -log10(fit2$p.value),
+     xlab = &quot;Difference in logRatios (H - N)&quot;, ylab = &quot;-log10(P-value)&quot;, main= paste(tf_name, &quot;H vs. N&quot;),
+     pch = 16, cex = 0.35)</code></pre>
+<p><img src="figure/compare_centipede_predictions_DiffACregions_HIF1A.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.3.3 (2017-03-06)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: macOS  10.13.4
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+ [1] stats4    parallel  grid      stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+ [1] VennDiagram_1.6.17   futile.logger_1.4.3  edgeR_3.14.0        
+ [4] limma_3.28.21        GenomicRanges_1.24.3 GenomeInfoDb_1.8.7  
+ [7] IRanges_2.6.1        S4Vectors_0.10.3     BiocGenerics_0.18.0 
+[10] gridExtra_2.3        ggplot2_2.2.1       
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_0.12.14         pillar_1.1.0         git2r_0.21.0        
+ [4] plyr_1.8.4           workflowr_1.0.1      XVector_0.12.1      
+ [7] futile.options_1.0.0 R.methodsS3_1.7.1    R.utils_2.6.0       
+[10] tools_3.3.3          zlibbioc_1.18.0      digest_0.6.13       
+[13] evaluate_0.10.1      tibble_1.4.1         gtable_0.2.0        
+[16] rlang_0.1.6          yaml_2.1.16          stringr_1.2.0       
+[19] knitr_1.18           rprojroot_1.3-2      rmarkdown_1.9       
+[22] lambda.r_1.1.9       magrittr_1.5         whisker_0.3-2       
+[25] splines_3.3.3        backports_1.1.2      scales_0.4.1        
+[28] htmltools_0.3.6      colorspace_1.3-2     stringi_1.1.5       
+[31] lazyeval_0.2.1       munsell_0.4.3        R.oo_1.21.0         </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
