@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/f1b58274e62565c242b6c7e24a63f9045e57f22e" target="_blank">f1b5827</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/4e7b89bc5d4f1784d68c062f7d70464720c17ee6" target="_blank">4e7b89b</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -353,7 +353,6 @@ Ignored files:
 
 Untracked files:
     Untracked:  analysis/fit_centipede_ATACseq.Rmd
-    Untracked:  code_RCC/.fitCentipede_TF_bams.sbatch.swp
     Untracked:  data/motifs/
     Untracked:  data/wgEncodeMapability/
     Untracked:  docs/figure/compare_centipede_predictions.Rmd/
@@ -389,6 +388,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/4e7b89bc5d4f1784d68c062f7d70464720c17ee6/analysis/ATACseq_preprocessing_pipeline.Rmd" target="_blank">4e7b89b</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+add ATAC-seq preprocessing pipeline
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/kevinlkx/ATAC-seq_analysis/7f2bbe94343853b426805c64e016faa68f7f0da9/docs/ATACseq_preprocessing_pipeline.html" target="_blank">7f2bbe9</a>
+</td>
+<td style="text-align:left;">
+Kevin Luo
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 html
@@ -428,10 +461,10 @@ add ATAC-seq preprocessing pipeline
 </ul>
 <p></details></p>
 <hr />
-<div id="step-0-download-jaspar-motif-database" class="section level2">
-<h2>Step 0: Download JASPAR motif database</h2>
-<p>Download <a href="http://jaspar.genereg.net">JASPAR</a> motif database <a href="http://jaspar.genereg.net/download/CORE/JASPAR2018_CORE_non-redundant_pfms_meme.zip" class="uri">http://jaspar.genereg.net/download/CORE/JASPAR2018_CORE_non-redundant_pfms_meme.zip</a></p>
-<p>Install required softwares:</p>
+<div id="step-0-download-jaspar-motif-database-and-install-required-software-tools" class="section level2">
+<h2>Step 0: Download JASPAR motif database and install required software tools</h2>
+<p><a href="http://jaspar.genereg.net">JASPAR</a> motif database <a href="http://jaspar.genereg.net/download/CORE/JASPAR2018_CORE_non-redundant_pfms_meme.zip" class="uri">http://jaspar.genereg.net/download/CORE/JASPAR2018_CORE_non-redundant_pfms_meme.zip</a></p>
+<p>Required softwares:</p>
 <ul>
 <li><a href="http://meme-suite.org/doc/fimo.html?man_type=web">FIMO</a> from MEME suite.</li>
 <li><a href="http://www.htslib.org">samtools</a></li>
@@ -442,69 +475,14 @@ add ATAC-seq preprocessing pipeline
 </div>
 <div id="step-1-find-tf-motif-matches-using-fimo" class="section level2">
 <h2>Step 1: Find TF motif matches using FIMO</h2>
-<p><a href="../code_RCC/fimo_jaspar_motif_rcc.sh">script</a></p>
-<pre class="bash"><code>cat code_RCC/fimo_jaspar_motif_rcc.sh</code></pre>
-<pre><code>#!/bin/bash
-#SBATCH --job-name=fimo
-#SBATCH --mem=8G
-#SBATCH --output=fimo_%J.out
-#SBATCH --partition=broadwl
-
-##############################################################################
-# get motif matches using FIMO
-#
-# requires FIMO from MEME suite
-# FIMO instructions: http://meme-suite.org/doc/fimo.html?man_type=web
-#installation: http://meme-suite.org/doc/install.html?man_type=web
-##############################################################################
-
-
-## parameters
-tf_name=$1
-pwm_id=$2
-thresh_pValue=$3 # 1e-4
-
-###### example ######
-# tf_name=&quot;CTCF&quot;
-# pwm_id=&quot;MA0139.1&quot;
-# thresh_pValue=1e-4
-#####################
-
-flank=100
-ver_genome=hg19
-max_fimo_sites=1000000
-
-## extract pwm meme file
-echo &quot;pwm_id: $pwm_id, tf_name: $tf_name&quot;
-
-pwm_name=&quot;${tf_name}_${pwm_id}_${thresh_pValue}&quot;
-
-# directory for Jaspar motifs
-dir_pwm=&quot;/project/mstephens/ATAC_DNase/motif_database/JASPAR_2018/JASPAR2018_CORE_non-redundant_pfms_meme&quot;
-pwm_filename=&quot;${dir_pwm}/${pwm_id}.meme&quot;
-
-# reference genome fasta file
-genome_filename=&quot;/project/mstephens/ATAC_DNase/ref_genome/${ver_genome}.fa&quot;
-
-# output directory for FIMO motif matching results
-dir_output=&quot;/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/&quot;
-mkdir -p ${dir_output}
-
-## FIMO matching motifs
-dir_motif_matches=&quot;${dir_output}/FIMO/${pwm_name}&quot;
-filename_motif_matches=&quot;${dir_motif_matches}/fimo.txt&quot;
-
-mkdir -p ${dir_motif_matches}
-echo &quot;Begin FIMO matching motif ...&quot;
-
-fimo --oc ${dir_motif_matches} --verbosity 2 --text \
-    --bgfile --uniform-- --thresh ${thresh_pValue} --max-stored-scores ${max_fimo_sites} \
-    ${pwm_filename} ${genome_filename}  \
-    &gt; ${filename_motif_matches}
-
-echo &quot;Finish FIMO: ${dir_motif_matches}&quot;</code></pre>
-<div id="run" class="section level3">
-<h3>run</h3>
+<div id="script" class="section level3">
+<h3>script</h3>
+<ul>
+<li><a href="../code_RCC/fimo_jaspar_motif_rcc.sh">fimo_jaspar_motif_rcc.sh</a></li>
+</ul>
+</div>
+<div id="sbatch-runs-on-rcc" class="section level3">
+<h3>sbatch runs on RCC</h3>
 <pre class="bash"><code># match motifs using FIMO ( p-value = 1e-4 ) on RCC
 
 # CTCF MA0139.1
@@ -518,87 +496,17 @@ sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh M
 </div>
 <div id="step-2-get-tf-candidate-binding-sites" class="section level2">
 <h2>Step 2: Get TF candidate binding sites</h2>
-<p><a href="../code_RCC/sites_jaspar_motif_rcc.sh">script</a></p>
-<pre class="bash"><code>cat code_RCC/sites_jaspar_motif_rcc.sh</code></pre>
-<pre><code>#!/bin/bash
-#SBATCH --job-name=sites
-#SBATCH --mem=8G
-#SBATCH --output=sites_%J.out
-#SBATCH --partition=broadwl
-
-
-################################################################################
-# The script process FIMO motif matches to get candidate binding sites
-#
-# requires process_pwm_sites.R to flank motif matches to get candidate sites
-# requires bigWigAverageOverBed tool from UCSC to compute mapablity
-# requires bedtools to filter out ENCODE blacklist regions
-################################################################################
-
-module load R
-
-## parameters
-tf_name=$1
-pwm_id=$2
-thresh_pValue=$3 # 1e-4
-
-###### example ######
-# tf_name=&quot;CTCF&quot;
-# pwm_id=&quot;MA0139.1&quot;
-# thresh_pValue=1e-4
-#####################
-
-flank=100
-ver_genome=hg19
-max_fimo_sites=1000000
-
-## extract pwm meme file
-echo &quot;pwm_id: $pwm_id, tf_name: $tf_name&quot;
-
-pwm_name=&quot;${tf_name}_${pwm_id}_${thresh_pValue}&quot;
-
-dir_code=$HOME/projects/ATAC-seq/ATAC-seq_workflow/code_RCC
-
-# directory for ENCODE mapability blacklist
-dir_blacklist=&quot;/project/mstephens/ATAC_DNase/ENCODE_blacklist/hg19&quot;
-
-# output directory for FIMO motif matching results
-dir_output=&quot;/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/&quot;
-mkdir -p ${dir_output}
-
-## FIMO matching motifs
-dir_motif_matches=&quot;${dir_output}/FIMO/${pwm_name}&quot;
-filename_motif_matches=&quot;${dir_motif_matches}/fimo.txt&quot;
-
-## get candidate sites after taking flanking windows around motif matches
-
-# output directory for candidate sites
-dir_sites=&quot;${dir_output}/candidate_sites/${thresh_pValue}&quot;
-mkdir -p ${dir_sites}
-
-sites=&quot;${dir_sites}/${pwm_name}_flank${flank}_fimo_sites.bed&quot;
-
-## mapability downloaded from http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/
-echo &quot;Flank motif sites and compute mapability...&quot;
-filename_mapability=&quot;${dir_blacklist}/wgEncodeDukeMapabilityUniqueness20bp.bigWig&quot;
-Rscript ${dir_code}/process_pwm_sites.R ${tf_name} ${pwm_id} ${filename_motif_matches} ${flank} ${thresh_pValue} ${dir_sites} ${filename_mapability}
-
-## filter ENCODE blacklist regions
-echo &quot;Filter ENCODE blacklist regions...&quot;
-blacklist_filename=&quot;${dir_blacklist}/wgEncodeDacMapabilityConsensusExcludable.bed&quot;
-bedtools intersect -v -a ${sites} -b ${blacklist_filename} &gt; ${sites}.filtered.tmp
-head -1 ${sites} | cat - ${sites}.filtered.tmp &gt; ${sites}.filtered
-mv ${sites}.filtered ${sites}
-rm ${sites}.filtered.tmp
-
-echo &quot;Complete candidate sites processing.&quot;</code></pre>
-<div id="run-1" class="section level3">
-<h3>run</h3>
+<div id="scripts" class="section level3">
+<h3>scripts</h3>
+<ul>
+<li><a href="../code_RCC/sites_jaspar_motif_rcc.sh">sites_jaspar_motif_rcc.sh</a></li>
+</ul>
+</div>
+<div id="sbatch-runs-on-rcc-1" class="section level3">
+<h3>sbatch runs on RCC</h3>
 <pre class="bash"><code>
-## use the bigWigAverageOverBed tool from UCSC to compute mapablity
-## https://genome.ucsc.edu/goldenpath/help/bigWig.html
-
-## use the bedtools intersect to filter out ENCODE blacklist regions
+# requires the bigWigAverageOverBed tool from UCSC to compute mapablity
+# requires the bedtools to filter out ENCODE blacklist regions
 
 sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh CTCF MA0139.1 1e-4
 
@@ -610,88 +518,16 @@ sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh 
 </div>
 <div id="step-3-count-atac-seq-genome-wide-cleavage-and-build-tagcount-bigwig-file" class="section level2">
 <h2>Step 3: Count ATAC-seq genome-wide cleavage, and build tagcount bigwig file</h2>
-<p><a href="../code_RCC/genome_coverage_bamToBigwig.sh">script</a></p>
-<pre class="bash"><code>cat code_RCC/genome_coverage_bamToBigwig.sh</code></pre>
-<pre><code>#!/bin/bash
-
-#SBATCH --job-name=coverage
-#SBATCH --output=coverage_%J.out
-#SBATCH --mem=10G
-#SBATCH --partition=broadwl
-
-################################################################################
-# get 5&#39; end coverage for bam files
-# Compute the DNase or ATAC-seq cleavage (5&#39; end) coverge along the genome
-#
-# requires samtools, bedtools, and bedGraphToBigWig (from UCSC)
-################################################################################
-
-bam_file=$1
-
-dir_results=&quot;/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_tagcounts/&quot;
-
-echo &quot;Compute genome coverage for ${bam_file}&quot;
-echo &quot;Output directory: ${dir_results}&quot;
-
-## fetch chrom size from UCSC
-# ver_genome=&quot;hg19&quot;
-# echo &quot;fetch chrom size for ${ver_genome}&quot;
-# mkdir -p &quot;${dir_results}/genome_size/&quot;
-# genome_chrom_sizes=&quot;${dir_results}/genome_size/${ver_genome}.chrom.sizes&quot;
-# fetchChromSizes ${ver_genome} &gt; ${genome_chrom_sizes}
-
-## or download from UCSC
-# cd ${dir_results}/genome_size/
-# wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes
-
-genome_chrom_sizes=&quot;/project/compbio/jointLCLs/reference_genomes/hg19/hg19.chrom.sizes&quot;
-
-## sort bam file
-bam_dir_name=$(dirname ${bam_file})
-bam_basename=$(basename ${bam_file} .bam)
-
-cd ${bam_dir_name}
-
-echo &quot;base bamfile: ${bam_basename}&quot;
-echo &quot;sort and index bam file&quot;
-
-samtools sort -o ${bam_basename}.sorted.bam ${bam_basename}.bam
-
-samtools index ${bam_basename}.sorted.bam
-
-samtools idxstats ${bam_basename}.sorted.bam &gt; ${bam_basename}.idxstats.txt
-
-bam_sorted_name=&quot;${bam_dir_name}/${bam_basename}.sorted.bam&quot;
-
-## count genome coverage, 5&#39; end, save in bedGraph format, then convert to bigWig format
-
-bw_file=&quot;${dir_results}/${bam_basename}.5p.0base.tagcount&quot;
-
-## forward strand
-echo &quot;Count genome coverage on + strand&quot;
-samtools view -b ${bam_sorted_name} | \
-genomeCoverageBed -bg -5 -strand &quot;+&quot; -ibam stdin -g ${genome_chrom_sizes} &gt; ${bw_file}.bedGraph
-
-echo &quot;coverting bedGraph to BigWig...&quot;
-sort -k1,1 -k2,2n ${bw_file}.bedGraph &gt; ${bw_file}.sorted.bedGraph
-bedGraphToBigWig ${bw_file}.sorted.bedGraph ${genome_chrom_sizes} ${bw_file}.fwd.bw
-rm ${bw_file}.bedGraph ${bw_file}.sorted.bedGraph
-
-## reverse strand
-echo &quot;Count genome coverage on - strand&quot;
-samtools view -b ${bam_sorted_name} | \
-genomeCoverageBed -bg -5 -strand &quot;-&quot; -ibam stdin -g ${genome_chrom_sizes} &gt; ${bw_file}.bedGraph
-
-echo &quot;coverting bedGraph to BigWig...&quot;
-sort -k1,1 -k2,2n ${bw_file}.bedGraph &gt; ${bw_file}.sorted.bedGraph
-bedGraphToBigWig ${bw_file}.sorted.bedGraph ${genome_chrom_sizes} ${bw_file}.rev.bw
-rm ${bw_file}.bedGraph ${bw_file}.sorted.bedGraph
-
-echo &quot;Finished computing genome coverage =&gt; ${bw_file}.bw&quot;</code></pre>
-<div id="run-2" class="section level3">
-<h3>run</h3>
+<div id="scripts-1" class="section level3">
+<h3>scripts</h3>
+<ul>
+<li><a href="../code_RCC/genome_coverage_bamToBigwig.sh">genome_coverage_bamToBigwig.sh</a></li>
+</ul>
+</div>
+<div id="sbatch-runs-on-rcc-2" class="section level3">
+<h3>sbatch runs on RCC</h3>
 <pre class="bash"><code>
-## bam files
+# bam files
 bamfiles=(&quot;H1_nomito_rdup.bam&quot; &quot;H2_nomito_rdup.bam&quot; &quot;H3_nomito_rdup.bam&quot; &quot;N1_nomito_rdup.bam&quot; &quot;N2_nomito_rdup.bam&quot; &quot;N3_nomito_rdup.bam&quot;)
 
 for bam_name in &quot;${bamfiles[@]}&quot;
@@ -704,87 +540,16 @@ done
 </div>
 <div id="step-4-match-atac-seq-tagcount-matrices-for-each-motif" class="section level2">
 <h2>Step 4: match ATAC-seq tagcount matrices for each motif</h2>
-<p><a href="../code_RCC/get_motif_count_matrices.sh">script</a></p>
-<pre class="bash"><code>cat code_RCC/get_motif_count_matrices.sh</code></pre>
-<pre><code>#!/bin/bash
-
-#SBATCH --job-name=extract_counts
-#SBATCH --output=extract_counts_%J.out
-#SBATCH --partition=broadwl
-#SBATCH --mem=8G
-
-################################################################################
-# The script takes bigwig files of DNase or ATAC-seq genome-wide count coverages
-# then, it extracts tagcounts for a TF with 100bp flanks around motif
-# and save in a tagcount matrix.
-#
-# requires bigwig tagcount files (in the earlier step)
-# requires bwtool to extract counts from bigwig files
-# requires rev_tagcount_bwtool.R to reverse counts on reverse strand
-################################################################################
-
-module load R
-
-tf_name=$1
-pwm_id=$2
-bam_name=$3
-
-thresh_pValue=&quot;1e-4&quot;
-flank=100
-ver_genome=&quot;hg19&quot;
-
-pwm_name=&quot;${tf_name}_${pwm_id}_${thresh_pValue}&quot;
-
-dir_code=$HOME/projects/ATAC-seq/ATAC-seq_workflow/code_RCC
-dir_tagcounts=/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_tagcounts/
-dir_count_matrix=/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_count_matrix/${pwm_name}/
-dir_sites=/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/candidate_sites/${thresh_pValue}/
-filename_sites=${dir_sites}/${pwm_name}_flank${flank}_fimo_sites.bed
-
-echo &quot;PWM name: ${pwm_name}&quot;
-echo &quot;Candidate sites: ${filename_sites}&quot;
-echo &quot;Bam filename: ${bam_name}&quot;
-
-## Extract counts around motif matches into tagcount matrices
-## Check the existence of tagcount bigwig files and candidate sites
-bam_basename=$(basename ${bam_name} .bam)
-bw_file=&quot;${dir_tagcounts}/${bam_basename}.5p.0base.tagcount&quot;
-file_tagcount_fwd=${bw_file}.fwd.bw
-file_tagcount_rev=${bw_file}.rev.bw
-echo &quot;Tagcount fwd name: ${file_tagcount_fwd}&quot;
-echo &quot;Tagcount rev name: ${file_tagcount_rev}&quot;
-
-if [ ! -s ${file_tagcount_fwd} ] || [ ! -s ${file_tagcount_rev} ]; then
-  echo &quot;ERROR: Tagcount bigwig files for: ${bam_name} does not exist!&quot;
-elif [ ! -s ${filename_sites} ]; then
-  echo &quot;ERROR: Candidate sites ${filename_sites} does not exist!&quot;
-else
-
-  echo &quot;Counting cuts around the candidate sites of ${pwm_name} with ${flank}bp flanking windows ...&quot;
-
-  mkdir -p ${dir_count_matrix}
-
-  file_count_matrix_fwd=&quot;${dir_count_matrix}/${pwm_name}_${bam_basename}_fwdcounts.m&quot;
-  file_count_matrix_rev=&quot;${dir_count_matrix}/${pwm_name}_${bam_basename}_revcounts.m&quot;
-
-  ## count matrix around the candidate sites
-  echo &quot;match matrix of ${file_count_matrix_fwd} ...&quot;
-  cut -f 1-4 ${filename_sites} | bwtool extract bed stdin ${file_tagcount_fwd} ${file_count_matrix_fwd} -fill=0 -decimals=0 -tabs
-
-  echo &quot;match matrix of ${file_count_matrix_rev} ...&quot;
-  cut -f 1-4 ${filename_sites} | bwtool extract bed stdin ${file_tagcount_rev} ${file_count_matrix_rev} -fill=0 -decimals=0 -tabs
-
-  Rscript ${dir_code}/rev_tagcount_bwtool.R ${file_count_matrix_fwd} ${file_count_matrix_rev} ${filename_sites}
-
-  # compress the files to .gz
-  gzip -f ${file_count_matrix_fwd} ${file_count_matrix_rev}
-  echo &quot;Finished counting for ${pwm_name} in ${bam_name}.&quot;
-
-fi</code></pre>
-<div id="run-3" class="section level3">
-<h3>run</h3>
+<div id="scripts-2" class="section level3">
+<h3>scripts</h3>
+<ul>
+<li><a href="../code_RCC/get_motif_count_matrices.sh">get_motif_count_matrices.sh</a></li>
+</ul>
+</div>
+<div id="sbatch-runs-on-rcc-3" class="section level3">
+<h3>sbatch runs on RCC</h3>
 <pre class="bash"><code>
-## bam files
+# bam files
 bamfiles=(&quot;H1_nomito_rdup.bam&quot; &quot;H2_nomito_rdup.bam&quot; &quot;H3_nomito_rdup.bam&quot; &quot;N1_nomito_rdup.bam&quot; &quot;N2_nomito_rdup.bam&quot; &quot;N3_nomito_rdup.bam&quot;)
 
 ## CTCF
@@ -794,21 +559,12 @@ do
    sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh CTCF MA0139.1 &quot;${bam_name}&quot;
 done
 
-## HIF1A::ARNT
-for bam_name in &quot;${bamfiles[@]}&quot;
-do
-   echo &quot;${bam_name}&quot;
-   sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh HIF1A::ARNT MA0259.1 &quot;${bam_name}&quot;
-done
-
-
 ## HIF1A
 for bam_name in &quot;${bamfiles[@]}&quot;
 do
    echo &quot;${bam_name}&quot;
    sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh HIF1A MA1106.1 &quot;${bam_name}&quot;
 done
-
 
 ## MEF2D
 for bam_name in &quot;${bamfiles[@]}&quot;
