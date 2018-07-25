@@ -15,7 +15,7 @@ pwm_name <- paste(tf_name, pwm_id, thresh_pvalue, sep = "_")
 dir_bam <- "/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/ATAC-seq_BAMfiles/"
 dir_sites <- paste0("/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/candidate_sites/", thresh_pvalue)
 dir_count_matrix <- "/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_count_matrix/"
-dir_predictions <- "/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/resultss/centipede_predictions/"
+dir_predictions <- "/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/centipede_predictions/"
 
 flank <- 100
 
@@ -188,4 +188,5 @@ dev.off()
 
 
 cat("Finished CENTIPEDE prediction for: ", pwm_name, "in", bam_name, "\n")
+cat("Results saved at", dir_predictions, "\n")
 
