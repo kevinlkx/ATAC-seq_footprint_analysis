@@ -317,7 +317,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-25</p>
+<p><strong>Last updated:</strong> 2018-07-26</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -341,7 +341,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/4e7b89bc5d4f1784d68c062f7d70464720c17ee6" target="_blank">4e7b89b</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/d6807bda2442fa1eb2f840e93d6bf832209ef6ef" target="_blank">d6807bd</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -352,14 +352,11 @@ Ignored files:
     Ignored:    data/.DS_Store
 
 Untracked files:
-    Untracked:  analysis/fit_centipede_ATACseq.Rmd
-    Untracked:  data/motifs/
-    Untracked:  data/wgEncodeMapability/
     Untracked:  docs/figure/compare_centipede_predictions.Rmd/
     Untracked:  workflow_setup.R
 
 Unstaged changes:
-    Modified:   analysis/index.Rmd
+    Modified:   analysis/fit_centipede_ATACseq.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -388,6 +385,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/d6807bda2442fa1eb2f840e93d6bf832209ef6ef/analysis/ATACseq_preprocessing_pipeline.Rmd" target="_blank">d6807bd</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+<td style="text-align:left;">
+add ATAC-seq preprocessing pipeline
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/kevinlkx/ATAC-seq_analysis/64716ac2b8021f8954ad41b2991246961cd7e9da/docs/ATACseq_preprocessing_pipeline.html" target="_blank">64716ac</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -570,7 +601,7 @@ done
 for bam_name in &quot;${bamfiles[@]}&quot;
 do
    echo &quot;${bam_name}&quot;
-   sbatch --mem=15G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh MEF2D MA0773.1 &quot;${bam_name}&quot;
+   sbatch --mem=30G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh MEF2D MA0773.1 &quot;${bam_name}&quot;
 done
 </code></pre>
 </div>
@@ -578,9 +609,13 @@ done
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.3.3 (2017-03-06)
-Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: macOS  10.13.4
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -589,13 +624,13 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 loaded via a namespace (and not attached):
- [1] workflowr_1.0.1   Rcpp_0.12.14      digest_0.6.13    
+ [1] workflowr_1.1.1   Rcpp_0.12.16      digest_0.6.15    
  [4] rprojroot_1.3-2   R.methodsS3_1.7.1 backports_1.1.2  
  [7] git2r_0.21.0      magrittr_1.5      evaluate_0.10.1  
-[10] stringi_1.1.5     whisker_0.3-2     R.oo_1.21.0      
-[13] R.utils_2.6.0     rmarkdown_1.9     tools_3.3.3      
-[16] stringr_1.2.0     yaml_2.1.16       htmltools_0.3.6  
-[19] knitr_1.18       </code></pre>
+[10] stringi_1.1.7     whisker_0.3-2     R.oo_1.22.0      
+[13] R.utils_2.6.0     rmarkdown_1.9     tools_3.4.3      
+[16] stringr_1.3.0     yaml_2.1.18       compiler_3.4.3   
+[19] htmltools_0.3.6   knitr_1.20       </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -614,7 +649,7 @@ footer is added to webpages before the MathJax javascript. -->
 <p>
   This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
   analysis was created with
-  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
 </p>
 <hr>
 
