@@ -27,7 +27,7 @@ Required softwares:
 
 ### script
 
-* [fimo_jaspar_motif_rcc.sh](../code_RCC/fimo_jaspar_motif_rcc.sh)
+* [fimo_jaspar_motif_rcc.sh](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/fimo_jaspar_motif_rcc.sh)
 
 ```{bash eval=FALSE, include = FALSE}
 cat code_RCC/fimo_jaspar_motif_rcc.sh
@@ -50,7 +50,7 @@ sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh M
 
 ### scripts
 
-* [sites_jaspar_motif_rcc.sh](../code_RCC/sites_jaspar_motif_rcc.sh)
+* [sites_jaspar_motif_rcc.sh](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/sites_jaspar_motif_rcc.sh)
 
 ```{bash eval=FALSE, include = FALSE}
 cat code_RCC/sites_jaspar_motif_rcc.sh
@@ -74,7 +74,7 @@ sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/sites_jaspar_motif_rcc.sh 
 
 ### scripts
 
-* [genome_coverage_bamToBigwig.sh](../code_RCC/genome_coverage_bamToBigwig.sh)
+* [genome_coverage_bamToBigwig.sh](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/genome_coverage_bamToBigwig.sh)
 
 ```{bash eval=FALSE, include = FALSE}
 cat code_RCC/genome_coverage_bamToBigwig.sh
@@ -98,7 +98,7 @@ done
 
 ### scripts
 
-* [get_motif_count_matrices.sh](../code_RCC/get_motif_count_matrices.sh)
+* [get_motif_count_matrices.sh](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/get_motif_count_matrices.sh)
 
 ```{bash eval=FALSE, include = FALSE}
 cat code_RCC/get_motif_count_matrices.sh
