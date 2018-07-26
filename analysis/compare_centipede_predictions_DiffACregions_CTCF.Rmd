@@ -55,9 +55,11 @@ tf_name <- "CTCF"
 pwm_name <- "CTCF_MA0139.1_1e-4"
 
 thresh_PostPr_bound <- 0.99
-cat(pwm_name, "\n")
 
 flank <- 100
+
+cat("PWM name: ", pwm_name, "\n")
+
 
 ```
 
