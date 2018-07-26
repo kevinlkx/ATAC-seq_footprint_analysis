@@ -1,0 +1,334 @@
+---
+title: "Compare CENTIPEDE predictions for MEF2D for regions that differentially open between hypoxia vs. normoxia"
+author: "Kaixuan Luo"
+date: "7/25/2018"
+output: 
+  workflowr::wflow_html:
+        toc: TRUE
+        code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(grid)
+library(gridExtra)
+suppressPackageStartupMessages(library(GenomicRanges))
+library(limma)
+library(edgeR)
+library(VennDiagram)
+
+message <- futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
+
+## venn diagram
+plot_venn_overlaps <- function(overlaps.m, title = "", col_fill = NULL, category.names = NULL){
+  grid.newpage()
+  overlaps_venn.l <- lapply(as.data.frame(overlaps.m), function(x) which(x == 1))
+  if(is.null(col_fill)){
+    col_fill <-  1:length(overlaps_venn.l)
+  }
+  if(is.null(category.names)){
+    category.names <- names(x)
+  }
+  
+  venn.plot <- venn.diagram( 
+    x = overlaps_venn.l,
+    category.names = category.names, 
+    filename = NULL,
+    fill = col_fill,
+    alpha=rep(0.5, length(overlaps_venn.l)), 
+    cex = 1.5, 
+    cat.fontface=4, 
+    main=title) 
+  grid.draw(venn.plot)
+}
+
+```
+
+
+## parameters
+```{r}
+tf_name <- "MEF2D"
+pwm_name <- "MEF2D_MA0773.1_1e-4"
+
+thresh_PostPr_bound <- 0.99
+
+flank <- 100
+
+cat("PWM name: ", pwm_name, "\n")
+
+
+```
+
+## load diff accessibility test results, comparing hypoxia vs. normoxia.
+
+* log fold change > 0 indicates differentially open in hypoxia.
+* log fold change < 0 indicates differentially open in normoxia.
+
+```{r}
+diffAC_regions.df <- read.csv("~/Dropbox/research/ATAC_DNase/ATAC-seq_Olivia_Gray/results/DiffAC_regions/ordered_results_withcoords.csv")
+
+cat(nrow(diffAC_regions.df), "regions in total \n")
+
+diffAC_regions.df <- diffAC_regions.df[, c("chr", "Start", "End","GeneID", "baseMean", "Strand",  "log2FoldChange", "lfcSE", "stat", "pvalue", "padj")]
+
+diffAC_sig_regions.df <- diffAC_regions.df[diffAC_regions.df$padj < 0.1, ]
+cat(nrow(diffAC_sig_regions.df), "significant regions \n")
+
+hist(diffAC_regions.df$log2FoldChange, xlab = "log2FoldChange", main = "Differentially open regions (FDR < 10%)")
+
+diffAC_sigH_regions.df <- diffAC_sig_regions.df[diffAC_sig_regions.df$log2FoldChange > 0, ]
+cat(nrow(diffAC_sigH_regions.df), "regions differentially open in hypoxia. \n")
+
+diffAC_sigN_regions.df <- diffAC_sig_regions.df[diffAC_sig_regions.df$log2FoldChange < 0, ]
+cat(nrow(diffAC_sigN_regions.df), "regions differentially open in normoxia. \n")
+
+diffAC_sig_regions.gr <- makeGRangesFromDataFrame(diffAC_sig_regions.df, start.field = "Start", end.field = "End", keep.extra.columns = T)
+
+diffAC_sigH_regions.gr <- makeGRangesFromDataFrame(diffAC_sigH_regions.df, start.field = "Start", end.field = "End", keep.extra.columns = T)
+
+diffAC_sigN_regions.gr <- makeGRangesFromDataFrame(diffAC_sigN_regions.df, start.field = "Start", end.field = "End", keep.extra.columns = T)
+
+```
+
+## load CENTIPEDE predictions 
+```{r}
+
+dir_predictions <- paste0("~/Dropbox/research/ATAC_DNase/ATAC-seq_Olivia_Gray/results/centipede_predictions/", pwm_name)
+
+## condition: N
+bam_namelist_N <- c("N1_nomito_rdup.bam", "N2_nomito_rdup.bam", "N3_nomito_rdup.bam")
+
+site_predictions_N.l <- vector("list", 3)
+names(site_predictions_N.l) <- bam_namelist_N
+
+for(i in 1:length(bam_namelist_N)){
+  bam_basename <- tools::file_path_sans_ext(basename(bam_namelist_N[[i]]))
+  site_predictions_N.l[[i]] <- read.table(paste0(dir_predictions, "/", pwm_name, "_", bam_basename, "_predictions.txt"), header = T, stringsAsFactors = F)
+}
+
+CentPostPr_N.df <- data.frame(N1 = site_predictions_N.l[[1]]$CentPostPr, 
+                              N2 = site_predictions_N.l[[2]]$CentPostPr, 
+                              N3 = site_predictions_N.l[[3]]$CentPostPr)
+
+CentLogRatios_N.df <- data.frame(N1 = site_predictions_N.l[[1]]$CentLogRatios, 
+                                 N2 = site_predictions_N.l[[2]]$CentLogRatios, 
+                                 N3 = site_predictions_N.l[[3]]$CentLogRatios)
+
+## condition: H
+bam_namelist_H <- c("H1_nomito_rdup.bam", "H2_nomito_rdup.bam", "H3_nomito_rdup.bam")
+
+site_predictions_H.l <- vector("list", 3)
+names(site_predictions_H.l) <- bam_namelist_H
+
+for(i in 1:length(bam_namelist_H)){
+  bam_basename <- tools::file_path_sans_ext(basename(bam_namelist_H[[i]]))
+  site_predictions_H.l[[i]] <- read.table(paste0(dir_predictions, "/", pwm_name, "_", bam_basename, "_predictions.txt"), header = T, stringsAsFactors = F)
+}
+
+CentPostPr_H.df <- data.frame(H1 = site_predictions_H.l[[1]]$CentPostPr, 
+                              H2 = site_predictions_H.l[[2]]$CentPostPr, 
+                              H3 = site_predictions_H.l[[3]]$CentPostPr)
+
+CentLogRatios_H.df <- data.frame(H1 = site_predictions_H.l[[1]]$CentLogRatios, 
+                                 H2 = site_predictions_H.l[[2]]$CentLogRatios, 
+                                 H3 = site_predictions_H.l[[3]]$CentLogRatios)
+
+if(any(site_predictions_N.l[[1]]$name != site_predictions_H.l[[1]]$name)){
+  stop("sites not match!")
+}
+
+sites.df <- site_predictions_N.l[[1]][,1:7]
+
+## get motif coordinates
+if(sites.df[1, "end"] - sites.df[1, "start"] > flank){
+  sites.df$start <- sites.df$start + flank
+  sites.df$end <- sites.df$end - flank
+}
+
+
+sites.gr <- makeGRangesFromDataFrame(sites.df, start.field = "start", end.field = "end", keep.extra.columns = F)
+
+
+CentPostPr.df <- cbind(CentPostPr_N.df, CentPostPr_H.df)
+CentLogRatios.df <- cbind(CentLogRatios_N.df, CentLogRatios_H.df)
+
+sites_CentPostPr.df <- cbind(sites.df, CentPostPr_N.df, CentPostPr_H.df)
+sites_CentLogRatios.df <- cbind(sites.df, CentLogRatios_N.df, CentLogRatios_H.df)
+
+
+```
+
+## intersect CENTIPEDE sites with diffAC regions
+```{r}
+overlaps_diffAC.df <- as.data.frame(findOverlaps(query = sites.gr, subject = diffAC_sig_regions.gr, type = "within", ignore.strand = T))
+idx_sites_diffAC <- unique(overlaps_diffAC.df$queryHits)
+cat(length(idx_sites_diffAC), "candidate motif sites differentially open in hypoxia or normoxia. \n")
+
+
+overlaps_sigH.df <- as.data.frame(findOverlaps(query = sites.gr, subject = diffAC_sigH_regions.gr, type = "within", ignore.strand = T))
+idx_sites_sigH <- unique(overlaps_sigH.df$queryHits)
+
+cat(length(idx_sites_sigH), "candidate motif sites differentially open in hypoxia. \n")
+
+
+overlaps_sigN.df <- as.data.frame(findOverlaps(query = sites.gr, subject = diffAC_sigN_regions.gr, type = "within", ignore.strand = T))
+idx_sites_sigN <- unique(overlaps_sigN.df$queryHits)
+
+cat(length(idx_sites_sigN), "candidate motif sites differentially open in normoxia. \n")
+
+```
+
+## number of reads mapped
+```{r}
+dir_bam <- "~/Dropbox/research/ATAC_DNase/ATAC-seq_Olivia_Gray/ATAC-seq_BAMfiles/"
+
+bam_basename_list <- c("N1_nomito_rdup", "N2_nomito_rdup", "N3_nomito_rdup", 
+                  "H1_nomito_rdup", "H2_nomito_rdup", "H3_nomito_rdup")
+
+reads_mapped <- rep(NA, length = length(bam_basename_list))
+names(reads_mapped) <- bam_basename_list
+
+for(bam_basename in bam_basename_list){
+  readstats_name <-  paste0(dir_bam, "/", bam_basename, ".idxstats.txt")
+  readstats.df <- read.table(readstats_name, header = F)
+  reads_mapped[bam_basename] <- sum(readstats.df[,3])
+}
+
+cat("Number of reads mapped (million): \n")
+print(reads_mapped/1e6)
+
+```
+
+## binarize to bound and unbound
+```{r}
+cat("Number of bound sites that are differentially open in hypoxia: \n")
+
+colSums(CentPostPr.df[idx_sites_sigH, ] > thresh_PostPr_bound)
+
+cat("Number of bound sites that are differentially open in normoxia: \n")
+
+colSums(CentPostPr.df[idx_sites_sigN, ] > thresh_PostPr_bound)
+
+```
+
+## Average binding probablity and average logRatios
+### all motif sites
+```{r}
+
+# binding probablity
+par(pty="s")
+plot(rowMeans(CentPostPr_N.df), rowMeans(CentPostPr_H.df), 
+     xlab = "N average P(Bound)", ylab = "H average P(Bound)", main = tf_name,
+     pch = ".", col = rgb(0,0,1,0.7))
+abline(a=0, b=1, col = "darkgray")
+
+# logRatios
+par(mfrow = c(1,2))
+par(pty="s")
+plot(rowMeans(CentLogRatios_N.df), rowMeans(CentLogRatios_H.df), 
+     xlab = "N average logRatios", ylab = "H average logRatios", main = tf_name, 
+     pch = ".", col = rgb(0,0,1,0.7))
+abline(a=0,b=1,col = "darkgray")
+
+plot(x = (rowMeans(CentLogRatios_H.df)+rowMeans(CentLogRatios_N.df))/2, 
+     y = rowMeans(CentLogRatios_H.df) - rowMeans(CentLogRatios_N.df),
+     xlab = "average logRatios", ylab = "Difference in logRatios (H - N)", main = tf_name,
+     pch = ".", col = rgb(0,0,1,0.7))
+abline(v=0, h=0, col = "darkgray")
+
+```
+
+### sites that are differentially open in hypoxia
+```{r}
+cat(length(idx_sites_sigH), "candidate motif sites differentially open in hypoxia. \n")
+
+# binding probablity
+par(pty="s")
+plot(rowMeans(CentPostPr_N.df[idx_sites_sigH,]), rowMeans(CentPostPr_H.df[idx_sites_sigH,]), 
+     xlab = "N average P(Bound)", ylab = "H average P(Bound)", main = paste(tf_name, "bound sites"),
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0, b=1, col = "darkgray")
+
+# logRatios
+par(mfrow = c(1,2))
+par(pty="s")
+plot(rowMeans(CentLogRatios_N.df[idx_sites_sigH,]), rowMeans(CentLogRatios_H.df[idx_sites_sigH,]), 
+     xlab = "N average logRatios", ylab = "H average logRatios", main = tf_name, 
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0,b=1,col = "darkgray")
+
+plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigH,])+rowMeans(CentLogRatios_N.df[idx_sites_sigH,]))/2, 
+     y = rowMeans(CentLogRatios_H.df[idx_sites_sigH,]) - rowMeans(CentLogRatios_N.df[idx_sites_sigH,]),
+     xlab = "average logRatios", ylab = "Difference in logRatios (H - N)", main = tf_name,
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(v=0, h=0, col = "darkgray")
+
+```
+
+### sites that are differentially open in normoxia
+```{r}
+cat(length(idx_sites_sigN), "candidate motif sites differentially open in normoxia \n")
+
+# binding probablity
+par(pty="s")
+plot(rowMeans(CentPostPr_N.df[idx_sites_sigN,]), rowMeans(CentPostPr_H.df[idx_sites_sigN,]), 
+     xlab = "N average P(Bound)", ylab = "H average P(Bound)", main = paste(tf_name, "bound sites"),
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0, b=1, col = "darkgray")
+
+# logRatios
+par(mfrow = c(1,2))
+par(pty="s")
+plot(rowMeans(CentLogRatios_N.df[idx_sites_sigN,]), rowMeans(CentLogRatios_H.df[idx_sites_sigN,]), 
+     xlab = "N average logRatios", ylab = "H average logRatios", main = tf_name, 
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(a=0,b=1,col = "darkgray")
+
+plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigN,])+rowMeans(CentLogRatios_N.df[idx_sites_sigN,]))/2, 
+     y = rowMeans(CentLogRatios_H.df[idx_sites_sigN,]) - rowMeans(CentLogRatios_N.df[idx_sites_sigN,]),
+     xlab = "average logRatios", ylab = "Difference in logRatios (H - N)", main = tf_name,
+     pch = 20, col = rgb(0,0,1,0.7))
+abline(v=0, h=0, col = "darkgray")
+
+```
+
+## Compare logRatios for differentially accessible sites using limma
+```{r}
+targets <- data.frame(bam = c(bam_namelist_N, bam_namelist_H), 
+                      label = colnames(CentLogRatios.df), 
+                      condition = rep(c("N", "H"), each = 3))
+
+print(targets)
+
+condition <- factor(targets$condition, levels = c("N", "H"))
+design <- model.matrix(~0+condition)
+colnames(design) <- levels(condition)
+print(design)
+
+CentLogRatios_diffAC.df <- CentLogRatios.df[idx_sites_diffAC, ]
+
+fit <- lmFit(CentLogRatios_diffAC.df, design)
+contrasts <- makeContrasts(H-N, levels=design)
+fit2 <- contrasts.fit(fit, contrasts)
+fit2 <- eBayes(fit2, trend=TRUE)
+num_diffbind <- summary(decideTests(fit2))
+
+percent_diffbind <- round(num_diffbind / sum(num_diffbind) * 100, 2)
+
+cat(num_diffbind[1], "sites differentially open in normoxia (", percent_diffbind[1], "%) \n", 
+    num_diffbind[3], "sites differentially open in hypoxia (", percent_diffbind[3], "%) \n",
+    num_diffbind[2], "sites not significantly different (", percent_diffbind[2], "%) \n")
+
+# volcanoplot(fit2, main="H vs. N", xlab = "Difference in logRatios (H - N)")
+
+plot(x = fit2$coef, y = -log10(fit2$p.value),
+     xlab = "Difference in logRatios (H - N)", ylab = "-log10(P-value)", main= paste(tf_name, "H vs. N"),
+     pch = 16, cex = 0.35)
+
+
+```
+
