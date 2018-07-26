@@ -5,9 +5,17 @@ output:
   workflowr::wflow_html:
     toc: false
 ---
+### Pre-processing ATAC-seq data and fit CENTIPEDE model
+
+* [Pre-processing ATAC-seq data](ATACseq_preprocessing_pipeline.html)
+
+* [fit CENTIPEDE model](fit_centipede_ATACseq.html)
 
 ### Compare TF binding between normoxia and hypoxia using CENTIPEDE predictions on ATAC-seq data
 
 * [Compare CENTIPEDE predictions for HIF1A](compare_centipede_predictions_HIF1A.html)
 
 * [Compare CENTIPEDE predictions for CTCF](compare_centipede_predictions_CTCF.html)
+
+* [Compare CENTIPEDE predictions for MEF2D](compare_centipede_predictions_MEF2D.html)
+
