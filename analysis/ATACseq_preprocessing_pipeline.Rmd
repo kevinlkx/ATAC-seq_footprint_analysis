@@ -51,6 +51,7 @@ sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fimo_jaspar_motif_rcc.sh M
 ### scripts
 
 * [sites_jaspar_motif_rcc.sh](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/sites_jaspar_motif_rcc.sh)
+* [process_pwm_sites.R](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/process_pwm_sites.R)
 
 ```{bash eval=FALSE, include = FALSE}
 cat code_RCC/sites_jaspar_motif_rcc.sh
@@ -99,6 +100,8 @@ done
 ### scripts
 
 * [get_motif_count_matrices.sh](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/get_motif_count_matrices.sh)
+
+* [rev_tagcount_bwtool.R](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/rev_tagcount_bwtool.R)
 
 ```{bash eval=FALSE, include = FALSE}
 cat code_RCC/get_motif_count_matrices.sh
