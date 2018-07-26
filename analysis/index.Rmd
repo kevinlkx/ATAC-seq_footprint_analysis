@@ -19,3 +19,11 @@ output:
 
 * [Compare CENTIPEDE predictions for MEF2D](compare_centipede_predictions_MEF2D.html)
 
+### Compare TF binding using CENTIPEDE predictions for motif matches in differential accessbile regions between normoxia and hypoxia
+
+* [Compare CENTIPEDE predictions for HIF1A](compare_centipede_predictions_DiffACregions_HIF1A.html)
+
+* [Compare CENTIPEDE predictions for CTCF](compare_centipede_predictions_DiffACregions_CTCF.html)
+
+* [Compare CENTIPEDE predictions for MEF2D](compare_centipede_predictions_DiffACregions_MEF2D.html)
+
