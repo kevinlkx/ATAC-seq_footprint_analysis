@@ -13,7 +13,7 @@ navbar:
       href: license.html
   right:
     - icon: fa-github
-      href: https://github.com/jdblischak/workflowr
+      href: https://github.com/kevinlkx/ATAC-seq_footprint_analysis
 output:
   workflowr::wflow_html:
     toc: true
