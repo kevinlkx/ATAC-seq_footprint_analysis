@@ -15,8 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### scripts
 
-* [fitCentipede_ATAC-seq_counts.R](../code_RCC/fitCentipede_ATAC-seq_counts.R)
-* [fitCentipede_TF_bams.sh](../code_RCC/fitCentipede_TF_bams.sh)
+* [fitCentipede_ATAC-seq_counts.R](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/fitCentipede_ATAC-seq_counts.R)
+* [fitCentipede_TF_bams.sh](https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/master/code_RCC/fitCentipede_TF_bams.sh)
 
 ### runs
 ```{bash eval=FALSE, include=TRUE}
@@ -48,7 +48,7 @@ sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh CT
 
 sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh HIF1A MA1106.1 0.8 0 1e-4
 
-sbatch --mem=30G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh MEF2D MA0773.1 0.8 0 1e-4
+sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh MEF2D MA0773.1 0.8 0 1e-4
 
 
 ```
