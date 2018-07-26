@@ -1,0 +1,227 @@
+---
+title: "Compare CENTIPEDE predictions for all MEF2D candidate sites (motif matches)"
+author: "Kaixuan Luo"
+date: "6/18/2018"
+output: 
+  workflowr::wflow_html:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(limma)
+library(edgeR)
+library(VennDiagram)
+
+message <- futile.logger::flog.threshold(futile.logger::ERROR, name = "VennDiagramLogger")
+
+## venn diagram
+plot_venn_overlaps <- function(overlaps.m, title = "", col_fill = NULL, category.names = NULL){
+  grid.newpage()
+  overlaps_venn.l <- lapply(as.data.frame(overlaps.m), function(x) which(x == 1))
+  if(is.null(col_fill)){
+    col_fill <-  1:length(overlaps_venn.l)
+  }
+  if(is.null(category.names)){
+    category.names <- names(x)
+  }
+  
+  venn.plot <- venn.diagram( 
+    x = overlaps_venn.l,
+    category.names = category.names, 
+    filename = NULL,
+    fill = col_fill,
+    alpha=rep(0.5, length(overlaps_venn.l)), 
+    cex = 1.5, 
+    cat.fontface=4, 
+    main=title) 
+  grid.draw(venn.plot)
+}
+
+```
+
+
+## select TF
+```{r}
+tf_name <- "MEF2D"
+pwm_name <- "MEF2D_MA0773.1_1e-4"
+
+thresh_PostPr_bound <- 0.99
+cat(pwm_name, "\n")
+
+```
+
+## load CENTIPEDE predictions 
+```{r}
+
+dir_predictions <- paste0("~/Dropbox/research/ATAC_DNase/ATAC-seq_Olivia_Gray/results/centipede_predictions/", pwm_name)
+
+## condition: N
+bam_namelist_N <- c("N1_nomito_rdup.bam", "N2_nomito_rdup.bam", "N3_nomito_rdup.bam")
+
+site_predictions_N.l <- vector("list", 3)
+names(site_predictions_N.l) <- bam_namelist_N
+
+for(i in 1:length(bam_namelist_N)){
+  bam_basename <- tools::file_path_sans_ext(basename(bam_namelist_N[[i]]))
+  site_predictions_N.l[[i]] <- read.table(paste0(dir_predictions, "/", pwm_name, "_", bam_basename, "_predictions.txt"), header = T, stringsAsFactors = F)
+}
+
+CentPostPr_N.df <- data.frame(N1 = site_predictions_N.l[[1]]$CentPostPr, 
+                              N2 = site_predictions_N.l[[2]]$CentPostPr, 
+                              N3 = site_predictions_N.l[[3]]$CentPostPr)
+
+CentLogRatios_N.df <- data.frame(N1 = site_predictions_N.l[[1]]$CentLogRatios, 
+                                 N2 = site_predictions_N.l[[2]]$CentLogRatios, 
+                                 N3 = site_predictions_N.l[[3]]$CentLogRatios)
+
+
+## condition: H
+bam_namelist_H <- c("H1_nomito_rdup.bam", "H2_nomito_rdup.bam", "H3_nomito_rdup.bam")
+
+site_predictions_H.l <- vector("list", 3)
+names(site_predictions_H.l) <- bam_namelist_H
+
+for(i in 1:length(bam_namelist_H)){
+  bam_basename <- tools::file_path_sans_ext(basename(bam_namelist_H[[i]]))
+  site_predictions_H.l[[i]] <- read.table(paste0(dir_predictions, "/", pwm_name, "_", bam_basename, "_predictions.txt"), header = T, stringsAsFactors = F)
+}
+
+name_sites <- site_predictions_H.l[[1]]$name
+
+CentPostPr_H.df <- data.frame(H1 = site_predictions_H.l[[1]]$CentPostPr, 
+                              H2 = site_predictions_H.l[[2]]$CentPostPr, 
+                              H3 = site_predictions_H.l[[3]]$CentPostPr)
+
+CentLogRatios_H.df <- data.frame(H1 = site_predictions_H.l[[1]]$CentLogRatios, 
+                                 H2 = site_predictions_H.l[[2]]$CentLogRatios, 
+                                 H3 = site_predictions_H.l[[3]]$CentLogRatios)
+
+CentPostPr.df <- cbind(CentPostPr_N.df, CentPostPr_H.df)
+CentLogRatios.df <- cbind(CentLogRatios_N.df, CentLogRatios_H.df)
+
+```
+
+## binarize to bound and unbound
+```{r}
+cat("Number of bound sites: \n")
+
+colSums(CentPostPr.df > thresh_PostPr_bound)
+
+idx_bound <- which(rowSums(CentPostPr.df > thresh_PostPr_bound) >= 2)
+cat(length(idx_bound), "(",round(length(idx_bound)/nrow(CentPostPr.df) *100, 2), "% ) sites are bound in at least two samples \n")
+
+bound_N <- rowSums(CentPostPr.df[,c("N1", "N2", "N3")] > thresh_PostPr_bound) >= 2
+bound_H <- rowSums(CentPostPr.df[,c("H1", "H2", "H3")] > thresh_PostPr_bound) >= 2
+bound_N_H <- data.frame(N = bound_N, H = bound_H)
+plot_venn_overlaps(bound_N_H, title = paste("Number of", tf_name, "bound sites"), 
+                   category.names = c("Bound in N", "Bound in H"), col_fill = c("blue", "red"))
+
+```
+
+## Plot average binding and average logRatios
+
+red dots are those sites bound in at least two samples
+```{r}
+
+par(pty="s")
+plot(rowMeans(CentPostPr_N.df), rowMeans(CentPostPr_H.df), 
+     xlab = "N average P(Bound)", ylab = "H average P(Bound)", main = tf_name,
+     pch = ".", col = rgb(0,0,1,0.7))
+points(rowMeans(CentPostPr_N.df)[idx_bound], rowMeans(CentPostPr_H.df)[idx_bound], 
+       pch = ".", col = rgb(1,0,0,0.7))
+abline(a=0,b=1)
+mtext(text = "red dots are those sites bound in at least two samples", side = 3, line = 0, cex = 0.7)
+
+par(mfrow = c(1,2))
+par(pty="s")
+plot(rowMeans(CentLogRatios_N.df), rowMeans(CentLogRatios_H.df), 
+     xlab = "N average logRatios", ylab = "H average logRatios", main = tf_name, 
+     pch = ".", col = rgb(0,0,1,0.7))
+points(rowMeans(CentLogRatios_N.df)[idx_bound], rowMeans(CentLogRatios_H.df)[idx_bound], 
+       pch = ".", col = rgb(1,0,0,0.7))
+abline(a=0,b=1,col = "darkgray")
+
+plot(x = (rowMeans(CentLogRatios_H.df) + rowMeans(CentLogRatios_N.df))/2, 
+     y = rowMeans(CentLogRatios_H.df) - rowMeans(CentLogRatios_N.df),
+     xlab = "average logRatios", ylab = "Difference in logRatios (H - N)", main = tf_name,
+     pch = ".", col = rgb(0,0,1,0.7))
+points(x = ((rowMeans(CentLogRatios_H.df) + rowMeans(CentLogRatios_N.df))/2)[idx_bound], 
+       y = (rowMeans(CentLogRatios_H.df) - rowMeans(CentLogRatios_N.df))[idx_bound],
+       pch = ".", col = rgb(1,0,0,0.7))
+abline(v=0, h=0, col = "darkgray")
+
+```
+
+## PCA
+### all sites
+```{r}
+pca_logRatios <- prcomp(t(CentLogRatios.df))
+percentage <- round(pca_logRatios$sdev / sum(pca_logRatios$sdev) * 100, 2)
+percentage <- paste0( colnames(pca_logRatios$x), " (", paste( as.character(percentage), "%)") )
+
+pca_logRatios.df <- as.data.frame(pca_logRatios$x)
+pca_logRatios.df$group <- rep(c("N","H"), each = 3)
+p <- ggplot(pca_logRatios.df, aes(x=PC1,y=PC2,color=group,label=row.names(pca_logRatios.df)))
+p <- p + geom_point() + geom_text(size = 3, show.legend = F, vjust = 2, nudge_y = 0.5) + 
+  labs(title = tf_name, x = percentage[1], y = percentage[2])
+p
+
+```
+
+### bound sites
+```{r}
+pca_logRatios <- prcomp(t(CentLogRatios.df[idx_bound, ]))
+percentage <- round(pca_logRatios$sdev / sum(pca_logRatios$sdev) * 100, 2)
+percentage <- paste0( colnames(pca_logRatios$x), " (", paste( as.character(percentage), "%)") )
+
+pca_logRatios.df <- as.data.frame(pca_logRatios$x)
+pca_logRatios.df$group <- rep(c("N","H"), each = 3)
+p <- ggplot(pca_logRatios.df, aes(x=PC1,y=PC2,color=group,label=row.names(pca_logRatios.df)))
+p <- p + geom_point() + geom_text(size = 3, show.legend = F, vjust = 2, nudge_y = 0.5) + 
+  labs(title = tf_name, x = percentage[1], y = percentage[2])
+p
+
+```
+
+## Differential logRatios for bound sites using limma
+```{r}
+targets <- data.frame(bam = c(bam_namelist_N, bam_namelist_H), 
+                      label = colnames(CentLogRatios.df), 
+                      condition = rep(c("N", "H"), each = 3))
+
+print(targets)
+
+condition <- factor(targets$condition, levels = c("N", "H"))
+design <- model.matrix(~0+condition)
+colnames(design) <- levels(condition)
+print(design)
+
+CentLogRatios_Bound.df <- CentLogRatios.df[idx_bound, ]
+
+fit <- lmFit(CentLogRatios_Bound.df, design)
+contrasts <- makeContrasts(H-N, levels=design)
+fit2 <- contrasts.fit(fit, contrasts)
+fit2 <- eBayes(fit2, trend=TRUE)
+num_diffbind <- summary(decideTests(fit2))
+percent_diffbind <- round(num_diffbind / sum(num_diffbind) * 100, 2)
+
+cat(num_diffbind[1], "sites differentially open in normoxia (", percent_diffbind[1], "%) \n", 
+    num_diffbind[3], "sites differentially open in hypoxia (", percent_diffbind[3], "%) \n",
+    num_diffbind[2], "sites not significantly different (", percent_diffbind[2], "%) \n")
+
+# volcanoplot(fit2, main="H vs. N", xlab = "Difference in logRatios (H - N)")
+
+plot(x = fit2$coef, y = -log10(fit2$p.value),
+     xlab = "Difference in logRatios (H - N)", ylab = "-log10(P-value)", main= paste(tf_name, "H vs. N"),
+     pch = 16, cex = 0.35)
+
+
+```
+
