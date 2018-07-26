@@ -1,5 +1,5 @@
 ---
-title: "Compare CENTIPEDE predictions for CTCF for regions that differentially open between hypoxia vs. normoxia"
+title: "Compare CENTIPEDE predictions for HIF1A for regions that differentially open between hypoxia vs. normoxia"
 author: "Kaixuan Luo"
 date: "7/25/2018"
 output: 
@@ -55,9 +55,10 @@ tf_name <- "HIF1A"
 pwm_name <- "HIF1A_MA1106.1_1e-4"
 
 thresh_PostPr_bound <- 0.99
-cat(pwm_name, "\n")
 
 flank <- 100
+
+cat("PWM name: ", pwm_name, "\n")
 
 ```
 
@@ -162,8 +163,6 @@ sites_CentLogRatios.df <- cbind(sites.df, CentLogRatios_N.df, CentLogRatios_H.df
 
 ## intersect CENTIPEDE sites with diffAC regions
 ```{r}
-
-
 overlaps_diffAC.df <- as.data.frame(findOverlaps(query = sites.gr, subject = diffAC_sig_regions.gr, type = "within", ignore.strand = T))
 idx_sites_diffAC <- unique(overlaps_diffAC.df$queryHits)
 cat(length(idx_sites_diffAC), "candidate motif sites differentially open in hypoxia or normoxia. \n")
@@ -182,6 +181,26 @@ cat(length(idx_sites_sigN), "candidate motif sites differentially open in normox
 
 ```
 
+## number of reads mapped
+```{r}
+dir_bam <- "~/Dropbox/research/ATAC_DNase/ATAC-seq_Olivia_Gray/ATAC-seq_BAMfiles/"
+
+bam_basename_list <- c("N1_nomito_rdup", "N2_nomito_rdup", "N3_nomito_rdup", 
+                  "H1_nomito_rdup", "H2_nomito_rdup", "H3_nomito_rdup")
+
+reads_mapped <- rep(NA, length = length(bam_basename_list))
+names(reads_mapped) <- bam_basename_list
+
+for(bam_basename in bam_basename_list){
+  readstats_name <-  paste0(dir_bam, "/", bam_basename, ".idxstats.txt")
+  readstats.df <- read.table(readstats_name, header = F)
+  reads_mapped[bam_basename] <- sum(readstats.df[,3])
+}
+
+cat("Number of reads mapped (million): \n")
+print(reads_mapped/1e6)
+
+```
 
 ## binarize to bound and unbound
 ```{r}
