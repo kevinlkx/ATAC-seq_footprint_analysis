@@ -201,7 +201,7 @@ print(targets)
 condition <- factor(targets$condition, levels = c("N", "H"))
 design <- model.matrix(~0+condition)
 colnames(design) <- levels(condition)
-print(design)
+# print(design)
 
 CentLogRatios_Bound.df <- CentLogRatios.df[idx_bound, ]
 
