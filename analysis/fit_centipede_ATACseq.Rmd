@@ -48,7 +48,7 @@ sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh CT
 
 sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh HIF1A MA1106.1 0.8 0 1e-4
 
-sbatch ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh MEF2D MA0773.1 0.8 0 1e-4
+sbatch --mem=30G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/fitCentipede_TF_bams.sh MEF2D MA0773.1 0.8 0 1e-4
 
 
 ```
