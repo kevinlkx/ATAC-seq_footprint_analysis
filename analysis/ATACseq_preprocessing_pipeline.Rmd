@@ -128,7 +128,7 @@ done
 for bam_name in "${bamfiles[@]}"
 do
    echo "${bam_name}"
-   sbatch --mem=15G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh MEF2D MA0773.1 "${bam_name}"
+   sbatch --mem=30G ~/projects/ATAC-seq/ATAC-seq_workflow/code_RCC/get_motif_count_matrices.sh MEF2D MA0773.1 "${bam_name}"
 done
 
 ```
