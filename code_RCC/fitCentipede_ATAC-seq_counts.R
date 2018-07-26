@@ -27,13 +27,13 @@ load_combine_counts <- function(bam_basename, pwm_name, dir_count_matrix){
   counts_rev.df <- read.table(paste0(dir_count_matrix, "/", pwm_name, "/", pwm_name, "_", bam_basename, "_revcounts.m.gz"))
 
   ## the first 5 columns from "bwtool extract" are chr, start, end, name, and the number of data points
-  counts_fwd.m <- counts_fwd.df[, 6:ncol(counts_fwd.df)]
-  counts_rev.m <- counts_rev.df[, 6:ncol(counts_rev.df)]
+  counts_fwd.df <- counts_fwd.df[, -c(1:5)]
+  counts_rev.df <- counts_rev.df[, -c(1:5)]
 
-  colnames(counts_fwd.m) <- paste0("fwd", 1:ncol(counts_fwd.m))
-  colnames(counts_rev.m) <- paste0("rev", 1:ncol(counts_rev.m))
+  colnames(counts_fwd.df) <- paste0("fwd", 1:ncol(counts_fwd.df))
+  colnames(counts_rev.df) <- paste0("rev", 1:ncol(counts_rev.df))
 
-  counts_combined.m <- cbind(counts_fwd.m, counts_rev.m)
+  counts_combined.m <- as.matrix(cbind(counts_fwd.df, counts_rev.df))
 
   return(counts_combined.m)
 }
@@ -127,7 +127,10 @@ heatmap_data_results <- function(pwm, data, results.df, rank, tf_name, title_nam
 
 ###### begins here ######
 bam_basename <- tools::file_path_sans_ext(basename(bam_name))
+
 cat("bam file:", bam_basename, "\n")
+
+cat("pwm_name:", pwm_name, "\n")
 
 filename_sites <- paste0(dir_sites, "/", pwm_name, "_flank", flank, "_fimo_sites.bed")
 
@@ -160,7 +163,7 @@ site_predictions.df <- data.frame(sites.df,
 
 dir.create(paste0(paste0(dir_predictions, "/", pwm_name)), recursive = T, showWarnings = F)
 
-write.table(site_predictions.df, gzfile(paste0(dir_predictions, "/", pwm_name, "/", pwm_name, "_", bam_basename, "_predictions.txt.gz")),
+write.table(site_predictions.df, paste0(dir_predictions, "/", pwm_name, "/", pwm_name, "_", bam_basename, "_predictions.txt"),
             col.names = T, row.names = F, quote = F)
 
 pdf(paste0(dir_predictions, "/", pwm_name, "/", pwm_name, "_", bam_basename, "_centipede_figures.pdf"))
