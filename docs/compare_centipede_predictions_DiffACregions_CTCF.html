@@ -12,7 +12,7 @@
 <meta name="author" content="Kaixuan Luo" />
 
 
-<title>Compare CENTIPEDE predictions for CTCF for regions that differentially open between hypoxia vs. normoxia</title>
+<title>Compare CENTIPEDE predictions for CTCF for regions that differentially open between hypoxia vs. normoxia</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -334,7 +334,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-07-25</p>
+<p><strong>Last updated:</strong> 2018-07-26</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -358,7 +358,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/c62862585762d431151704f90d6aedf30ddef110" target="_blank">c628625</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/4d492e69c59119fbc82185ee0aca92825f96c17c" target="_blank">4d492e6</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -369,16 +369,15 @@ Ignored files:
     Ignored:    data/.DS_Store
 
 Untracked files:
-    Untracked:  data/motifs/
-    Untracked:  data/wgEncodeMapability/
+    Untracked:  analysis/compare_centipede_predictions_DiffACregions_MEF2D.Rmd
     Untracked:  docs/figure/compare_centipede_predictions.Rmd/
+    Untracked:  docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/
     Untracked:  workflow_setup.R
 
 Unstaged changes:
     Modified:   analysis/ATACseq_preprocessing_pipeline.Rmd
-    Modified:   analysis/compare_centipede_predictions_HIF1A.Rmd
-    Modified:   analysis/index.Rmd
-    Modified:   code_RCC/fitCentipede_ATAC-seq_counts.R
+    Modified:   analysis/fit_centipede_ATACseq.Rmd
+    Modified:   analysis/license.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -407,6 +406,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/4d492e69c59119fbc82185ee0aca92825f96c17c/analysis/compare_centipede_predictions_DiffACregions_CTCF.Rmd" target="_blank">4d492e6</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+<td style="text-align:left;">
+compare centipede predictions for CTCF in DiffAC regions
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/kevinlkx/ATAC-seq_analysis/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/compare_centipede_predictions_DiffACregions_CTCF.html" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -441,6 +474,7 @@ Attaching package: &#39;limma&#39;</code></pre>
     plotMA</code></pre>
 <pre class="r"><code>library(edgeR)
 library(VennDiagram)</code></pre>
+<pre><code>Warning: package &#39;VennDiagram&#39; was built under R version 3.4.4</code></pre>
 <pre><code>Loading required package: futile.logger</code></pre>
 <pre class="r"><code>message &lt;- futile.logger::flog.threshold(futile.logger::ERROR, name = &quot;VennDiagramLogger&quot;)
 
@@ -472,9 +506,11 @@ plot_venn_overlaps &lt;- function(overlaps.m, title = &quot;&quot;, col_fill = N
 pwm_name &lt;- &quot;CTCF_MA0139.1_1e-4&quot;
 
 thresh_PostPr_bound &lt;- 0.99
-cat(pwm_name, &quot;\n&quot;)</code></pre>
-<pre><code>CTCF_MA0139.1_1e-4 </code></pre>
-<pre class="r"><code>flank &lt;- 100</code></pre>
+
+flank &lt;- 100
+
+cat(&quot;PWM name: &quot;, pwm_name, &quot;\n&quot;)</code></pre>
+<pre><code>PWM name:  CTCF_MA0139.1_1e-4 </code></pre>
 </div>
 <div id="load-diff-accessibility-test-results-comparing-hypoxia-vs.normoxia." class="section level2">
 <h2>load diff accessibility test results, comparing hypoxia vs. normoxia.</h2>
@@ -493,6 +529,36 @@ cat(nrow(diffAC_sig_regions.df), &quot;significant regions \n&quot;)</code></pre
 <pre><code>2390 significant regions </code></pre>
 <pre class="r"><code>hist(diffAC_regions.df$log2FoldChange, xlab = &quot;log2FoldChange&quot;, main = &quot;Differentially open regions (FDR &lt; 10%)&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-3-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-3-1.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>diffAC_sigH_regions.df &lt;- diffAC_sig_regions.df[diffAC_sig_regions.df$log2FoldChange &gt; 0, ]
 cat(nrow(diffAC_sigH_regions.df), &quot;regions differentially open in hypoxia. \n&quot;)</code></pre>
 <pre><code>201 regions differentially open in hypoxia. </code></pre>
@@ -610,6 +676,36 @@ plot(rowMeans(CentPostPr_N.df), rowMeans(CentPostPr_H.df),
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-7-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-7-1.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code># logRatios
 par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
@@ -624,6 +720,36 @@ plot(x = (rowMeans(CentLogRatios_H.df)+rowMeans(CentLogRatios_N.df))/2,
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-7-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-7-2.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="sites-that-are-differentially-open-in-hypoxia" class="section level3">
 <h3>sites that are differentially open in hypoxia</h3>
@@ -636,6 +762,36 @@ plot(rowMeans(CentPostPr_N.df[idx_sites_sigH,]), rowMeans(CentPostPr_H.df[idx_si
      pch = 20, col = rgb(0,0,1,0.7))
 abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-8-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-8-1.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code># logRatios
 par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
@@ -650,6 +806,36 @@ plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigH,])+rowMeans(CentLogRatios_N
      pch = 20, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-8-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-8-2.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="sites-that-are-differentially-open-in-normoxia" class="section level3">
 <h3>sites that are differentially open in normoxia</h3>
@@ -662,6 +848,36 @@ plot(rowMeans(CentPostPr_N.df[idx_sites_sigN,]), rowMeans(CentPostPr_H.df[idx_si
      pch = 20, col = rgb(0,0,1,0.7))
 abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-9-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-9-1.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code># logRatios
 par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
@@ -676,6 +892,36 @@ plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigN,])+rowMeans(CentLogRatios_N
      pch = 20, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-9-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-9-2.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 </div>
 <div id="compare-logratios-for-differentially-accessible-sites-using-limma" class="section level2">
@@ -730,39 +976,76 @@ plot(x = fit2$coef, y = -log10(fit2$p.value),
      xlab = &quot;Difference in logRatios (H - N)&quot;, ylab = &quot;-log10(P-value)&quot;, main= paste(tf_name, &quot;H vs. N&quot;),
      pch = 16, cex = 0.35)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-10-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/ec5a6ef2b0dbe30fea9d104ffe83e5af0961ba07/docs/figure/compare_centipede_predictions_DiffACregions_CTCF.Rmd/unnamed-chunk-10-1.png" target="_blank">ec5a6ef</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-25
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>R version 3.3.3 (2017-03-06)
-Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: macOS  10.13.4
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
- [1] stats4    parallel  grid      stats     graphics  grDevices utils    
+ [1] parallel  stats4    grid      stats     graphics  grDevices utils    
  [8] datasets  methods   base     
 
 other attached packages:
- [1] VennDiagram_1.6.17   futile.logger_1.4.3  edgeR_3.14.0        
- [4] limma_3.28.21        GenomicRanges_1.24.3 GenomeInfoDb_1.8.7  
- [7] IRanges_2.6.1        S4Vectors_0.10.3     BiocGenerics_0.18.0 
+ [1] VennDiagram_1.6.20   futile.logger_1.4.3  edgeR_3.20.9        
+ [4] limma_3.34.9         GenomicRanges_1.30.3 GenomeInfoDb_1.14.0 
+ [7] IRanges_2.12.0       S4Vectors_0.16.0     BiocGenerics_0.24.0 
 [10] gridExtra_2.3        ggplot2_2.2.1       
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.14         pillar_1.1.0         git2r_0.21.0        
- [4] plyr_1.8.4           workflowr_1.0.1      XVector_0.12.1      
- [7] futile.options_1.0.0 R.methodsS3_1.7.1    R.utils_2.6.0       
-[10] tools_3.3.3          zlibbioc_1.18.0      digest_0.6.13       
-[13] evaluate_0.10.1      tibble_1.4.1         gtable_0.2.0        
-[16] rlang_0.1.6          yaml_2.1.16          stringr_1.2.0       
-[19] knitr_1.18           rprojroot_1.3-2      rmarkdown_1.9       
-[22] lambda.r_1.1.9       magrittr_1.5         whisker_0.3-2       
-[25] splines_3.3.3        backports_1.1.2      scales_0.4.1        
-[28] htmltools_0.3.6      colorspace_1.3-2     stringi_1.1.5       
-[31] lazyeval_0.2.1       munsell_0.4.3        R.oo_1.21.0         </code></pre>
+ [1] Rcpp_0.12.16           formatR_1.5            XVector_0.18.0        
+ [4] compiler_3.4.3         pillar_1.2.2           git2r_0.21.0          
+ [7] plyr_1.8.4             workflowr_1.1.1        futile.options_1.0.1  
+[10] zlibbioc_1.24.0        R.methodsS3_1.7.1      R.utils_2.6.0         
+[13] bitops_1.0-6           tools_3.4.3            digest_0.6.15         
+[16] lattice_0.20-35        evaluate_0.10.1        tibble_1.4.2          
+[19] gtable_0.2.0           rlang_0.2.0            yaml_2.1.18           
+[22] GenomeInfoDbData_1.0.0 stringr_1.3.0          knitr_1.20            
+[25] locfit_1.5-9.1         rprojroot_1.3-2        rmarkdown_1.9         
+[28] lambda.r_1.2.2         magrittr_1.5           whisker_0.3-2         
+[31] splines_3.4.3          backports_1.1.2        scales_0.5.0          
+[34] htmltools_0.3.6        colorspace_1.3-2       stringi_1.1.7         
+[37] RCurl_1.95-4.10        lazyeval_0.2.1         munsell_0.4.3         
+[40] R.oo_1.22.0           </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -781,7 +1064,7 @@ footer is added to webpages before the MathJax javascript. -->
 <p>
   This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
   analysis was created with
-  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.0.1
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
 </p>
 <hr>
 
