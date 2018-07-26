@@ -298,7 +298,7 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/jdblischak/workflowr">
+  <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis">
     <span class="fa fa-github"></span>
      
   </a>
@@ -358,7 +358,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_analysis/tree/fa3ed4c208721fde2b4d99b6547146e2f91fc31c" target="_blank">fa3ed4c</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/tree/962aeada03d482f05e3016c1b1c22129c564befa" target="_blank">962aead</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -369,13 +369,7 @@ Ignored files:
     Ignored:    data/.DS_Store
 
 Untracked files:
-    Untracked:  docs/figure/compare_centipede_predictions.Rmd/
     Untracked:  workflow_setup.R
-
-Unstaged changes:
-    Modified:   analysis/ATACseq_preprocessing_pipeline.Rmd
-    Modified:   analysis/fit_centipede_ATACseq.Rmd
-    Modified:   analysis/license.Rmd
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -406,10 +400,27 @@ Message
 <tbody>
 <tr>
 <td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/kevinlkx/ATAC-seq_footprint_analysis/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/compare_centipede_predictions_DiffACregions_MEF2D.html" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 Rmd
 </td>
 <td style="text-align:left;">
-<a href="https://github.com/kevinlkx/ATAC-seq_analysis/blob/fa3ed4c208721fde2b4d99b6547146e2f91fc31c/analysis/compare_centipede_predictions_DiffACregions_MEF2D.Rmd" target="_blank">fa3ed4c</a>
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/fa3ed4c208721fde2b4d99b6547146e2f91fc31c/analysis/compare_centipede_predictions_DiffACregions_MEF2D.Rmd" target="_blank">fa3ed4c</a>
 </td>
 <td style="text-align:left;">
 kevinlkx
@@ -493,6 +504,36 @@ cat(nrow(diffAC_sig_regions.df), &quot;significant regions \n&quot;)</code></pre
 <pre><code>2390 significant regions </code></pre>
 <pre class="r"><code>hist(diffAC_regions.df$log2FoldChange, xlab = &quot;log2FoldChange&quot;, main = &quot;Differentially open regions (FDR &lt; 10%)&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-3-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-3-1.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code>diffAC_sigH_regions.df &lt;- diffAC_sig_regions.df[diffAC_sig_regions.df$log2FoldChange &gt; 0, ]
 cat(nrow(diffAC_sigH_regions.df), &quot;regions differentially open in hypoxia. \n&quot;)</code></pre>
 <pre><code>201 regions differentially open in hypoxia. </code></pre>
@@ -634,6 +675,36 @@ plot(rowMeans(CentPostPr_N.df), rowMeans(CentPostPr_H.df),
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-8-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-8-1.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code># logRatios
 par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
@@ -648,6 +719,36 @@ plot(x = (rowMeans(CentLogRatios_H.df)+rowMeans(CentLogRatios_N.df))/2,
      pch = &quot;.&quot;, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-8-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-8-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-8-2.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="sites-that-are-differentially-open-in-hypoxia" class="section level3">
 <h3>sites that are differentially open in hypoxia</h3>
@@ -660,6 +761,36 @@ plot(rowMeans(CentPostPr_N.df[idx_sites_sigH,]), rowMeans(CentPostPr_H.df[idx_si
      pch = 20, col = rgb(0,0,1,0.7))
 abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-9-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-9-1.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code># logRatios
 par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
@@ -674,6 +805,36 @@ plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigH,])+rowMeans(CentLogRatios_N
      pch = 20, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-9-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-9-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-9-2.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="sites-that-are-differentially-open-in-normoxia" class="section level3">
 <h3>sites that are differentially open in normoxia</h3>
@@ -686,6 +847,36 @@ plot(rowMeans(CentPostPr_N.df[idx_sites_sigN,]), rowMeans(CentPostPr_H.df[idx_si
      pch = 20, col = rgb(0,0,1,0.7))
 abline(a=0, b=1, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-10-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-10-1.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <pre class="r"><code># logRatios
 par(mfrow = c(1,2))
 par(pty=&quot;s&quot;)
@@ -700,6 +891,36 @@ plot(x = (rowMeans(CentLogRatios_H.df[idx_sites_sigN,])+rowMeans(CentLogRatios_N
      pch = 20, col = rgb(0,0,1,0.7))
 abline(v=0, h=0, col = &quot;darkgray&quot;)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-10-2.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-10-2.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-10-2.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 </div>
 <div id="compare-logratios-for-differentially-accessible-sites-using-limma" class="section level2">
@@ -754,6 +975,36 @@ plot(x = fit2$coef, y = -log10(fit2$p.value),
      xlab = &quot;Difference in logRatios (H - N)&quot;, ylab = &quot;-log10(P-value)&quot;, main= paste(tf_name, &quot;H vs. N&quot;),
      pch = 16, cex = 0.35)</code></pre>
 <p><img src="figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-11-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/84c08c3f01cee2e3c199d98e31f053501908bdcf/docs/figure/compare_centipede_predictions_DiffACregions_MEF2D.Rmd/unnamed-chunk-11-1.png" target="_blank">84c08c3</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-07-26
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
