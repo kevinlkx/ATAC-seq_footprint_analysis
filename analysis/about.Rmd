@@ -5,4 +5,7 @@ output:
     toc: false
 ---
 
-Describe your project.
+Computational ATAC-seq analysis of human amniotic epithelial cells (HAECs) between normoxia and hypoxia conditions
+
+HAECs were from a single donor and then split into six small plates. Three plates were placed in hypoxia chamber where they were incubated at 1% oxygen, while the other three plates were placed in normal incubator at atmospheric oxygen concentrations. 
+
