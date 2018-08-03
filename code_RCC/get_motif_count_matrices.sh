@@ -21,16 +21,17 @@ tf_name=$1
 pwm_id=$2
 bam_name=$3
 
+ver_genome="hg19"
+
 thresh_pValue="1e-4"
 flank=100
-ver_genome="hg19"
 
 pwm_name="${tf_name}_${pwm_id}_${thresh_pValue}"
 
 dir_code=$HOME/projects/ATAC-seq/ATAC-seq_workflow/code_RCC
 dir_tagcounts=/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_tagcounts/
 dir_count_matrix=/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_count_matrix/${pwm_name}/
-dir_sites=/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/candidate_sites/${thresh_pValue}/
+dir_sites=/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/${ver_genome}/candidate_sites/${thresh_pValue}/
 filename_sites=${dir_sites}/${pwm_name}_flank${flank}_fimo_sites.bed
 
 echo "PWM name: ${pwm_name}"

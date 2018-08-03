@@ -26,8 +26,9 @@ thresh_pValue=$3 # 1e-4
 # thresh_pValue=1e-4
 #####################
 
+ver_genome="hg19"
+
 flank=100
-ver_genome=hg19
 max_fimo_sites=1000000
 
 ## extract pwm meme file
@@ -38,10 +39,10 @@ pwm_name="${tf_name}_${pwm_id}_${thresh_pValue}"
 dir_code=$HOME/projects/ATAC-seq/ATAC-seq_workflow/code_RCC
 
 # directory for ENCODE mapability blacklist
-dir_blacklist="/project/mstephens/ATAC_DNase/ENCODE_blacklist/hg19"
+dir_blacklist="/project/mstephens/ATAC_DNase/ENCODE_blacklist/${ver_genome}"
 
 # output directory for FIMO motif matching results
-dir_output="/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/"
+dir_output="/project/mstephens/ATAC_DNase/motif_sites_JASPAR2018/${ver_genome}"
 mkdir -p ${dir_output}
 
 ## FIMO matching motifs

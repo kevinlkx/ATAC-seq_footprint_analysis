@@ -15,6 +15,7 @@
 bam_file=$1
 
 dir_results="/project/mstephens/ATAC_DNase/ATAC-seq_Olivia_Gray/results/ATAC-seq_tagcounts/"
+mkdir -p ${dir_results}
 
 echo "Compute genome coverage for ${bam_file}"
 echo "Output directory: ${dir_results}"
