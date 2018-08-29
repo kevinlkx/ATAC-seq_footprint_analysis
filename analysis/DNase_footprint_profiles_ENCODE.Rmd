@@ -1,0 +1,387 @@
+---
+title: "DNase footprint profiles using ENCODE DNase-seq data"
+author: "Kaixuan Luo"
+date: "7/31/2018"
+output: 
+  workflowr::wflow_html:
+        toc: TRUE
+        code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## functions
+```{r}
+
+##### Functions #####
+## load and combine count matrices
+load_combine_counts <- function(tf_name, pwm_name, dir_count_matrix){
+  cat("Loading count matrices ... \n")
+  counts_fwd.df <- read.table(paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_hg19_dnase_fwdcounts.m.gz"))
+  counts_rev.df <- read.table(paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_hg19_dnase_revcounts.m.gz"))
+  
+  ## the first 5 columns from "bwtool extract" are chr, start, end, name, and the number of data points
+  counts_fwd.df <- counts_fwd.df[, -c(1:5)]
+  counts_rev.df <- counts_rev.df[, -c(1:5)]
+  
+  colnames(counts_fwd.df) <- paste0("fwd", 1:ncol(counts_fwd.df))
+  colnames(counts_rev.df) <- paste0("rev", 1:ncol(counts_rev.df))
+  
+  counts_combined.m <- as.matrix(cbind(counts_fwd.df, counts_rev.df))
+  
+  return(counts_combined.m)
+}
+
+## select candidate sites by mapability and PWM score cutoffs
+select_sites <- function(sites.df, thresh_mapability=NULL, thresh_PWMscore=NULL, readstats_name=NULL){
+  #  cat("loading sites ...\n")
+  cat("Select candidate sites \n")
+  
+  if(!is.null(thresh_mapability) || !is.na(thresh_mapability)){
+    cat("Select candidate sites with mapability >=", thresh_mapability, "\n")
+    idx_mapability <- (sites.df[,"mapability"] >= thresh_mapability)
+  }else{
+    idx_mapability <- rep(TRUE, nrow(sites.df))
+  }
+  
+  if(!is.null(thresh_PWMscore) || !is.na(thresh_PWMscore)){
+    cat("Select candidate sites with PWM score >=", thresh_PWMscore, "\n")
+    idx_pwm <- (sites.df[,"pwm_score"] >= thresh_PWMscore)
+  }else{
+    idx_pwm <- rep(TRUE, nrow(sites.df))
+  }
+  
+  if(!is.null(readstats_name)){
+    readstats.df <- read.table(readstats_name, header = F)
+    ## if the readstats.df contains chrY, then it means the cell type is male, then the candidate sites should contain chrY,
+    ## otherwise, the cell type is female, then the candidate sites on chrY should be removed.
+    if( "chrY" %in% readstats.df[,1] ){
+      cat("include chrY sites \n")
+      idx_chr <- (sites.df[,1] != "")
+    }else{
+      cat("chrY NOT in the bam file, filter out chrY sites \n")
+      ## remove chrY from candidate (motif) sites
+      idx_chr <- (sites.df[,1] != "chrY")
+    }
+    
+  }else{
+    idx_chr <- rep(TRUE, nrow(sites.df))
+  }
+  
+  idx_select <- which(idx_mapability & idx_pwm & idx_chr)
+  
+  return(idx_select)
+}
+
+
+```
+
+## parameters
+```{r}
+ver_genome <- "hg19"
+flank <- 100
+thresh_mapability <- 0.8
+thresh_PWMscore <- 10
+num_top_sites <- 1000 # plot top sites
+max_cuts <- 20 # Clip extreme values
+dir_data <- "~/Dropbox/research/ATAC_DNase/"
+```
+
+## CTCF in GM12878 cell type
+### load DNase footprint data
+```{r}
+cell_type <- "GM12878"
+tf_name <- "CTCF"
+pwm_name <- "CTCF_MA0139.1_1e-5"
+
+dir_count_matrix <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/")
+dir_sites_chip <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/ChIPSeq/")
+
+filename_sites <- paste0(dir_sites_chip, "/", "chipseq_", cell_type, "_", pwm_name, "_flank", flank, "_exp1.totalcount")
+
+sites.df <- read.table(filename_sites, header = T, comment.char = "!", stringsAsFactors = F)
+sites.df <- sites.df[, c("chr", "start", "end", "site", "pwmScore", "strand", "pValue", "mapability", "ChIP_mean")]
+colnames(sites.df) = c("chr", "start", "end", "name", "pwm_score", "strand", "p_value", "mapability", "ChIP")
+
+idx_select <- select_sites(sites.df, thresh_mapability, thresh_PWMscore)
+sites.df <- sites.df[idx_select, ]
+cat("Number of sites:", nrow(sites.df), "\n")
+
+counts_combined.m <- load_combine_counts(tf_name, pwm_name, dir_count_matrix)
+counts_combined.m <- counts_combined.m[idx_select,]
+
+## Clip extreme values
+counts_combined.m[counts_combined.m > max_cuts] <- max_cuts
+
+cat("Dimension of", dim(counts_combined.m), "\n")
+
+if(nrow(counts_combined.m) != nrow(sites.df)){
+  stop("Sites not matched!")
+}
+```
+
+### plot footprint profiles of highest occupancy
+```{r}
+order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
+
+par(mfrow = c(1,2))
+counts <- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = "l", col = "blue", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "forward strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts <- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = "l", col = "red", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "reverse strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+```
+
+
+### plot footprint profiles of most accessible sites
+```{r}
+order_high_acc <- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
+counts_profile <- apply(counts_combined.m[order_high_acc,], 2, mean)
+
+par(mfrow = c(1,2))
+counts <- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = "l", col = "blue", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "forward strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts <- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = "l", col = "red", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "reverse strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+```
+
+## CTCF in K562 cell type
+### load DNase footprint data
+```{r}
+cell_type <- "K562"
+tf_name <- "CTCF"
+pwm_name <- "CTCF_MA0139.1_1e-5"
+
+dir_count_matrix <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/")
+dir_sites_chip <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/ChIPSeq/")
+
+filename_sites <- paste0(dir_sites_chip, "/", "chipseq_", cell_type, "_", pwm_name, "_flank", flank, "_exp1.totalcount")
+
+sites.df <- read.table(filename_sites, header = T, comment.char = "!", stringsAsFactors = F)
+sites.df <- sites.df[, c("chr", "start", "end", "site", "pwmScore", "strand", "pValue", "mapability", "ChIP_mean")]
+colnames(sites.df) = c("chr", "start", "end", "name", "pwm_score", "strand", "p_value", "mapability", "ChIP")
+
+idx_select <- select_sites(sites.df, thresh_mapability, thresh_PWMscore)
+sites.df <- sites.df[idx_select, ]
+cat("Number of sites:", nrow(sites.df), "\n")
+
+counts_combined.m <- load_combine_counts(tf_name, pwm_name, dir_count_matrix)
+counts_combined.m <- counts_combined.m[idx_select,]
+
+## Clip extreme values
+counts_combined.m[counts_combined.m > max_cuts] <- max_cuts
+
+cat("Dimension of", dim(counts_combined.m), "\n")
+
+if(nrow(counts_combined.m) != nrow(sites.df)){
+  stop("Sites not matched!")
+}
+```
+
+### plot footprint profiles of highest occupancy
+```{r}
+order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
+
+par(mfrow = c(1,2))
+counts <- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = "l", col = "blue", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "forward strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts <- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = "l", col = "red", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "reverse strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+```
+
+
+### plot footprint profiles of most accessible sites
+```{r}
+order_high_acc <- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
+counts_profile <- apply(counts_combined.m[order_high_acc,], 2, mean)
+
+par(mfrow = c(1,2))
+counts <- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = "l", col = "blue", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "forward strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts <- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = "l", col = "red", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "reverse strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+```
+
+
+## REST in GM12878 cell type
+### load DNase footprint data
+```{r}
+cell_type <- "GM12878"
+tf_name <- "REST"
+pwm_name <- "REST_MA0138.2_1e-5"
+
+dir_count_matrix <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/")
+dir_sites_chip <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/ChIPSeq/")
+
+filename_sites <- paste0(dir_sites_chip, "/", "chipseq_", cell_type, "_", pwm_name, "_flank", flank, "_exp1.totalcount")
+
+sites.df <- read.table(filename_sites, header = T, comment.char = "!", stringsAsFactors = F)
+sites.df <- sites.df[, c("chr", "start", "end", "site", "pwmScore", "strand", "pValue", "mapability", "ChIP_mean")]
+colnames(sites.df) = c("chr", "start", "end", "name", "pwm_score", "strand", "p_value", "mapability", "ChIP")
+
+idx_select <- select_sites(sites.df, thresh_mapability, thresh_PWMscore)
+sites.df <- sites.df[idx_select, ]
+cat("Number of sites:", nrow(sites.df), "\n")
+
+counts_combined.m <- load_combine_counts(tf_name, pwm_name, dir_count_matrix)
+counts_combined.m <- counts_combined.m[idx_select,]
+
+## Clip extreme values
+counts_combined.m[counts_combined.m > max_cuts] <- max_cuts
+
+cat("Dimension of", dim(counts_combined.m), "\n")
+
+if(nrow(counts_combined.m) != nrow(sites.df)){
+  stop("Sites not matched!")
+}
+```
+
+
+### plot footprint profiles of highest occupancy
+```{r}
+order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
+
+par(mfrow = c(1,2))
+counts <- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = "l", col = "blue", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "forward strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts <- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = "l", col = "red", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "reverse strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+```
+
+
+### plot footprint profiles of most accessible sites
+```{r}
+order_high_acc <- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
+counts_profile <- apply(counts_combined.m[order_high_acc,], 2, mean)
+
+par(mfrow = c(1,2))
+counts <- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = "l", col = "blue", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "forward strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts <- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = "l", col = "red", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "reverse strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+```
+
+
+## REST in K562 cell type
+### load DNase footprint data
+```{r}
+cell_type <- "K562"
+tf_name <- "REST"
+pwm_name <- "REST_MA0138.2_1e-5"
+
+
+dir_count_matrix <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/")
+dir_sites_chip <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/ChIPSeq/")
+
+filename_sites <- paste0(dir_sites_chip, "/", "chipseq_", cell_type, "_", pwm_name, "_flank", flank, "_exp1.totalcount")
+
+sites.df <- read.table(filename_sites, header = T, comment.char = "!", stringsAsFactors = F)
+sites.df <- sites.df[, c("chr", "start", "end", "site", "pwmScore", "strand", "pValue", "mapability", "ChIP_mean")]
+colnames(sites.df) = c("chr", "start", "end", "name", "pwm_score", "strand", "p_value", "mapability", "ChIP")
+
+idx_select <- select_sites(sites.df, thresh_mapability, thresh_PWMscore)
+sites.df <- sites.df[idx_select, ]
+cat("Number of sites:", nrow(sites.df), "\n")
+
+counts_combined.m <- load_combine_counts(tf_name, pwm_name, dir_count_matrix)
+counts_combined.m <- counts_combined.m[idx_select,]
+
+## Clip extreme values
+counts_combined.m[counts_combined.m > max_cuts] <- max_cuts
+
+cat("Dimension of", dim(counts_combined.m), "\n")
+
+if(nrow(counts_combined.m) != nrow(sites.df)){
+  stop("Sites not matched!")
+}
+```
+
+### plot footprint profiles of highest occupancy
+```{r}
+order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
+
+par(mfrow = c(1,2))
+counts <- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = "l", col = "blue", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "forward strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts <- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = "l", col = "red", xlab = "Relative position (bp)", ylab = "Average counts", 
+     main = "", xaxt = "n")
+mtext(text = paste(tf_name, cell_type, "reverse strand"), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, '','' ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+```
