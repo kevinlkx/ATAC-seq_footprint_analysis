@@ -146,7 +146,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
 
 ## save counts matrix
 rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_hg19_dnase_fwdcounts_selected_sites.rds")
+                                  pwm_name, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 ```
 
@@ -231,7 +231,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
 
 ## save counts matrix
 rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_hg19_dnase_fwdcounts_selected_sites.rds")
+                                  pwm_name, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 
 ```
@@ -294,7 +294,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
 
 ## save counts matrix
 rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_hg19_dnase_fwdcounts_selected_sites.rds")
+                                  pwm_name, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 
 ```
@@ -384,7 +384,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
 
 ## save counts matrix
 rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_hg19_dnase_fwdcounts_selected_sites.rds")
+                                  pwm_name, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 
 ```
