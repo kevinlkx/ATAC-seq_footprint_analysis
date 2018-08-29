@@ -145,8 +145,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)
 
 ## save counts matrix
-rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
+rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 ```
 
@@ -230,8 +229,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)
 
 ## save counts matrix
-rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
+rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 
 ```
@@ -293,8 +291,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)
 
 ## save counts matrix
-rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
+rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 
 ```
@@ -383,8 +380,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
 
 
 ## save counts matrix
-rds_name <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/", tf_name, "/",
-                                  pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
+rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
 saveRDS(counts_selected.m, rds_name)
 
 ```
