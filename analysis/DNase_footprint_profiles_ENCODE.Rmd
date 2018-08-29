@@ -124,9 +124,8 @@ if(nrow(counts_combined.m) != nrow(sites.df)){
 
 ### plot footprint profiles of highest occupancy
 ```{r}
-order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
-counts_selected.m <- counts_combined.m[order_high_occ,]
-
+order_selected <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_selected.m <- counts_combined.m[order_selected,]
 counts_profile <- apply(counts_selected.m, 2, mean)
 
 par(mfrow = c(1,2))
@@ -154,8 +153,9 @@ saveRDS(counts_selected.m, rds_name)
 
 ### plot footprint profiles of most accessible sites
 ```{r}
-order_high_acc <- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
-counts_profile <- apply(counts_combined.m[order_high_acc,], 2, mean)
+order_selected <- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
+counts_selected.m <- counts_combined.m[order_selected,]
+counts_profile <- apply(counts_selected.m, 2, mean)
 
 par(mfrow = c(1,2))
 counts <- counts_profile[1:(length(counts_profile)/2)]
@@ -209,8 +209,9 @@ if(nrow(counts_combined.m) != nrow(sites.df)){
 
 ### plot footprint profiles of highest occupancy sites
 ```{r}
-order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
-counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
+order_selected <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_selected.m <- counts_combined.m[order_selected,]
+counts_profile <- apply(counts_selected.m, 2, mean)
 
 par(mfrow = c(1,2))
 counts <- counts_profile[1:(length(counts_profile)/2)]
@@ -271,8 +272,9 @@ if(nrow(counts_combined.m) != nrow(sites.df)){
 
 ### plot footprint profiles of highest occupancy sites
 ```{r}
-order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
-counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
+order_selected <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_selected.m <- counts_combined.m[order_selected,]
+counts_profile <- apply(counts_selected.m, 2, mean)
 
 par(mfrow = c(1,2))
 counts <- counts_profile[1:(length(counts_profile)/2)]
@@ -300,8 +302,9 @@ saveRDS(counts_selected.m, rds_name)
 
 ### plot footprint profiles of most accessible sites
 ```{r}
-order_high_acc <- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
-counts_profile <- apply(counts_combined.m[order_high_acc,], 2, mean)
+order_selected <- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
+counts_selected.m <- counts_combined.m[order_selected,]
+counts_profile <- apply(counts_selected.m, 2, mean)
 
 par(mfrow = c(1,2))
 counts <- counts_profile[1:(length(counts_profile)/2)]
@@ -357,8 +360,10 @@ if(nrow(counts_combined.m) != nrow(sites.df)){
 
 ### plot footprint profiles of highest occupancy sites
 ```{r}
-order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
-counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
+order_selected <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
+counts_selected.m <- counts_combined.m[order_selected,]
+counts_profile <- apply(counts_selected.m, 2, mean)
+
 
 par(mfrow = c(1,2))
 counts <- counts_profile[1:(length(counts_profile)/2)]
