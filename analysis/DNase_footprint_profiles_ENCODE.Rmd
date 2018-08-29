@@ -201,7 +201,7 @@ if(nrow(counts_combined.m) != nrow(sites.df)){
 }
 ```
 
-### plot footprint profiles of highest occupancy
+### plot footprint profiles of highest occupancy sites
 ```{r}
 order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
 counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
@@ -282,7 +282,7 @@ if(nrow(counts_combined.m) != nrow(sites.df)){
 ```
 
 
-### plot footprint profiles of highest occupancy
+### plot footprint profiles of highest occupancy sites
 ```{r}
 order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
 counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
@@ -363,7 +363,7 @@ if(nrow(counts_combined.m) != nrow(sites.df)){
 }
 ```
 
-### plot footprint profiles of highest occupancy
+### plot footprint profiles of highest occupancy sites
 ```{r}
 order_high_occ <- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
 counts_profile <- apply(counts_combined.m[order_high_occ,], 2, mean)
