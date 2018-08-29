@@ -358,7 +358,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/tree/09836f913cb5f7958e50af47869dd8a2018408c3" target="_blank">09836f9</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/tree/a233f1177ac0ece88d304d8224beeef928fa07b1" target="_blank">a233f11</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -413,6 +413,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/a233f1177ac0ece88d304d8224beeef928fa07b1/analysis/DNase_footprint_profiles_ENCODE.Rmd" target="_blank">a233f11</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-08-29
+</td>
+<td style="text-align:left;">
+plot DNase footprint profiles of CTCF and REST using ENCODE data
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/kevinlkx/ATAC-seq_footprint_analysis/b182c051faf1139658d4929ecb4a27b2d66980dc/docs/DNase_footprint_profiles_ENCODE.html" target="_blank">b182c05</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-08-29
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -581,7 +615,9 @@ cat(&quot;Dimension of&quot;, dim(counts_combined.m), &quot;\n&quot;)</code></pr
 <div id="plot-footprint-profiles-of-highest-occupancy" class="section level3">
 <h3>plot footprint profiles of highest occupancy</h3>
 <pre class="r"><code>order_high_occ &lt;- order(sites.df$ChIP, decreasing = T)[1:num_top_sites]
-counts_profile &lt;- apply(counts_combined.m[order_high_occ,], 2, mean)
+counts_selected.m &lt;- counts_combined.m[order_high_occ,]
+
+counts_profile &lt;- apply(counts_selected.m, 2, mean)
 
 par(mfrow = c(1,2))
 counts &lt;- counts_profile[1:(length(counts_profile)/2)]
@@ -629,6 +665,10 @@ kevinlkx
 </tbody>
 </table>
 <p></details></p>
+<pre class="r"><code>## save counts matrix
+rds_name &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_tagcount_matrix/&quot;, tf_name, &quot;/&quot;,
+                                  pwm_name, &quot;_hg19_dnase_fwdcounts_selected_sites.rds&quot;)
+saveRDS(counts_selected.m, rds_name)</code></pre>
 </div>
 <div id="plot-footprint-profiles-of-most-accessible-sites" class="section level3">
 <h3>plot footprint profiles of most accessible sites</h3>
@@ -771,58 +811,10 @@ kevinlkx
 </tbody>
 </table>
 <p></details></p>
-</div>
-<div id="plot-footprint-profiles-of-most-accessible-sites-1" class="section level3">
-<h3>plot footprint profiles of most accessible sites</h3>
-<pre class="r"><code>order_high_acc &lt;- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
-counts_profile &lt;- apply(counts_combined.m[order_high_acc,], 2, mean)
-
-par(mfrow = c(1,2))
-counts &lt;- counts_profile[1:(length(counts_profile)/2)]
-plot(counts, type = &quot;l&quot;, col = &quot;blue&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
-     main = &quot;&quot;, xaxt = &quot;n&quot;)
-mtext(text = paste(tf_name, cell_type, &quot;forward strand&quot;), side = 3, line = 1, cex = 1)
-axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
-     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
-
-counts &lt;- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
-
-plot(counts, type = &quot;l&quot;, col = &quot;red&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
-     main = &quot;&quot;, xaxt = &quot;n&quot;)
-mtext(text = paste(tf_name, cell_type, &quot;reverse strand&quot;), side = 3, line = 1, cex = 1)
-axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
-     cex.axis = 1, tck=-0.03, tick = T, cex = 1)</code></pre>
-<p><img src="figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-8-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/35c5febbef498dccc388240f29dadafc0474c080/docs/figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-8-1.png" target="_blank">35c5feb</a>
-</td>
-<td style="text-align:left;">
-kevinlkx
-</td>
-<td style="text-align:left;">
-2018-08-29
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<pre class="r"><code>## save counts matrix
+rds_name &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_tagcount_matrix/&quot;, tf_name, &quot;/&quot;,
+                                  pwm_name, &quot;_hg19_dnase_fwdcounts_selected_sites.rds&quot;)
+saveRDS(counts_selected.m, rds_name)</code></pre>
 </div>
 </div>
 <div id="rest-in-gm12878-cell-type" class="section level2">
@@ -882,6 +874,32 @@ plot(counts, type = &quot;l&quot;, col = &quot;red&quot;, xlab = &quot;Relative 
 mtext(text = paste(tf_name, cell_type, &quot;reverse strand&quot;), side = 3, line = 1, cex = 1)
 axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)</code></pre>
+<p><img src="figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## save counts matrix
+rds_name &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_tagcount_matrix/&quot;, tf_name, &quot;/&quot;,
+                                  pwm_name, &quot;_hg19_dnase_fwdcounts_selected_sites.rds&quot;)
+saveRDS(counts_selected.m, rds_name)</code></pre>
+</div>
+<div id="plot-footprint-profiles-of-most-accessible-sites-1" class="section level3">
+<h3>plot footprint profiles of most accessible sites</h3>
+<pre class="r"><code>order_high_acc &lt;- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
+counts_profile &lt;- apply(counts_combined.m[order_high_acc,], 2, mean)
+
+par(mfrow = c(1,2))
+counts &lt;- counts_profile[1:(length(counts_profile)/2)]
+plot(counts, type = &quot;l&quot;, col = &quot;blue&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
+     main = &quot;&quot;, xaxt = &quot;n&quot;)
+mtext(text = paste(tf_name, cell_type, &quot;forward strand&quot;), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+
+counts &lt;- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+
+plot(counts, type = &quot;l&quot;, col = &quot;red&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
+     main = &quot;&quot;, xaxt = &quot;n&quot;)
+mtext(text = paste(tf_name, cell_type, &quot;reverse strand&quot;), side = 3, line = 1, cex = 1)
+axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
+     cex.axis = 1, tck=-0.03, tick = T, cex = 1)</code></pre>
 <p><img src="figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-10-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
@@ -902,58 +920,6 @@ Date
 <tr>
 <td style="text-align:left;">
 <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/35c5febbef498dccc388240f29dadafc0474c080/docs/figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-10-1.png" target="_blank">35c5feb</a>
-</td>
-<td style="text-align:left;">
-kevinlkx
-</td>
-<td style="text-align:left;">
-2018-08-29
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
-</div>
-<div id="plot-footprint-profiles-of-most-accessible-sites-2" class="section level3">
-<h3>plot footprint profiles of most accessible sites</h3>
-<pre class="r"><code>order_high_acc &lt;- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
-counts_profile &lt;- apply(counts_combined.m[order_high_acc,], 2, mean)
-
-par(mfrow = c(1,2))
-counts &lt;- counts_profile[1:(length(counts_profile)/2)]
-plot(counts, type = &quot;l&quot;, col = &quot;blue&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
-     main = &quot;&quot;, xaxt = &quot;n&quot;)
-mtext(text = paste(tf_name, cell_type, &quot;forward strand&quot;), side = 3, line = 1, cex = 1)
-axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
-     cex.axis = 1, tck=-0.03, tick = T, cex = 1)
-
-counts &lt;- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
-
-plot(counts, type = &quot;l&quot;, col = &quot;red&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
-     main = &quot;&quot;, xaxt = &quot;n&quot;)
-mtext(text = paste(tf_name, cell_type, &quot;reverse strand&quot;), side = 3, line = 1, cex = 1)
-axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
-     cex.axis = 1, tck=-0.03, tick = T, cex = 1)</code></pre>
-<p><img src="figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-11-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/35c5febbef498dccc388240f29dadafc0474c080/docs/figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-11-1.png" target="_blank">35c5feb</a>
 </td>
 <td style="text-align:left;">
 kevinlkx
@@ -1025,37 +991,11 @@ plot(counts, type = &quot;l&quot;, col = &quot;red&quot;, xlab = &quot;Relative 
 mtext(text = paste(tf_name, cell_type, &quot;reverse strand&quot;), side = 3, line = 1, cex = 1)
 axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)</code></pre>
-<p><img src="figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-13-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/35c5febbef498dccc388240f29dadafc0474c080/docs/figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-13-1.png" target="_blank">35c5feb</a>
-</td>
-<td style="text-align:left;">
-kevinlkx
-</td>
-<td style="text-align:left;">
-2018-08-29
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/DNase_footprint_profiles_ENCODE.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>## save counts matrix
+rds_name &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_tagcount_matrix/&quot;, tf_name, &quot;/&quot;,
+                                  pwm_name, &quot;_hg19_dnase_fwdcounts_selected_sites.rds&quot;)
+saveRDS(counts_selected.m, rds_name)</code></pre>
 </div>
 </div>
 <div id="session-information" class="section level2">
