@@ -27,3 +27,9 @@ output:
 
 * [Compare CENTIPEDE predictions for MEF2D sites in differentially accessible regions](compare_centipede_predictions_DiffACregions_MEF2D.html)
 
+### Example footprint profiles
+* [ATAC-seq footprint profiles of the normoxia and hypoxia HAEC ATAC-seq data](ATACseq_footprint_profiles_OliviaGray_HAEC.html)
+* [ATAC-seq footprint profiles of GGR Duke A549 ATAC-seq data](ATACseq_footprint_profiles_GGR_Duke.html)
+* [DNase footprint profiles of ENCODE DNase-seq data](DNase_footprint_profiles_ENCODE.html)
+
+
