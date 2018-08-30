@@ -99,6 +99,9 @@ pwm_name <- "CTCF_MA0139.1_1e-5"
 dir_count_matrix <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/")
 dir_sites_chip <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/ChIPSeq/")
 
+dir_matrix_examples <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_count_matrix_examples/")
+dir.create(dir_matrix_examples, showWarnings = F, recursive = T)
+
 filename_sites <- paste0(dir_sites_chip, "/", "chipseq_", cell_type, "_", pwm_name, "_flank", flank, "_exp1.totalcount")
 
 sites.df <- read.table(filename_sites, header = T, comment.char = "!", stringsAsFactors = F)
@@ -145,8 +148,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)
 
 ## save counts matrix
-rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
-saveRDS(counts_selected.m, rds_name)
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, "/", pwm_name, "_", cell_type, "_dnase_counts_selected_sites.rds"))
 ```
 
 
@@ -182,6 +184,8 @@ pwm_name <- "CTCF_MA0139.1_1e-5"
 
 dir_count_matrix <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_tagcount_matrix/")
 dir_sites_chip <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/ChIPSeq/")
+dir_matrix_examples <- paste0(dir_data, "/DNase-seq_ENCODE/", cell_type, "/DNaseSeq/DNase_count_matrix_examples/")
+dir.create(dir_matrix_examples, showWarnings = F, recursive = T)
 
 filename_sites <- paste0(dir_sites_chip, "/", "chipseq_", cell_type, "_", pwm_name, "_flank", flank, "_exp1.totalcount")
 
@@ -229,8 +233,8 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)
 
 ## save counts matrix
-rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
-saveRDS(counts_selected.m, rds_name)
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, "/", pwm_name, "_", cell_type, "_dnase_counts_selected_sites.rds"))
+
 
 ```
 
@@ -291,8 +295,8 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
      cex.axis = 1, tck=-0.03, tick = T, cex = 1)
 
 ## save counts matrix
-rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
-saveRDS(counts_selected.m, rds_name)
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, "/", pwm_name, "_", cell_type, "_dnase_counts_selected_sites.rds"))
+
 
 ```
 
@@ -380,7 +384,7 @@ axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, 
 
 
 ## save counts matrix
-rds_name <- paste0(dir_count_matrix, "/", tf_name, "/", pwm_name, "_", cell_type, "_hg19_dnase_counts_selected_sites.rds")
-saveRDS(counts_selected.m, rds_name)
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, "/", pwm_name, "_", cell_type, "_dnase_counts_selected_sites.rds"))
+
 
 ```
