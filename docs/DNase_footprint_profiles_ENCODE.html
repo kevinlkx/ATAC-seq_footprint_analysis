@@ -334,7 +334,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-08-29</p>
+<p><strong>Last updated:</strong> 2018-08-30</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -358,7 +358,7 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/tree/eed77b574be8cf03b3098dbc738fceb935f3ec47" target="_blank">eed77b5</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/tree/2783ac951bf348dc150266053fa958153d87b448" target="_blank">2783ac9</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
@@ -375,13 +375,11 @@ Untracked files:
     Untracked:  analysis/ATACseq_preprocessing_pipeline_GGR_hg38.Rmd
     Untracked:  code_RCC/update_bamnames.R
     Untracked:  docs/figure/ATACseq_footprint_profiles_GGR_Duke.Rmd/
-    Untracked:  docs/figure/ATACseq_footprint_profiles_OliviaGray.Rmd/
-    Untracked:  docs/figure/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd/
-    Untracked:  docs/figure/ATACseq_footprint_profiles_smooth.Rmd/
     Untracked:  workflow_setup.R
 
 Unstaged changes:
     Modified:   analysis/ATACseq_preprocessing_pipeline.Rmd
+    Modified:   analysis/index.Rmd
     Modified:   code_RCC/fimo_jaspar_motif_rcc.sh
     Modified:   code_RCC/genome_coverage_bamToBigwig_GGR_hg38.sh
     Modified:   code_RCC/get_motif_count_matrices_GGR_hg38.sh
@@ -413,6 +411,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/2783ac951bf348dc150266053fa958153d87b448/analysis/DNase_footprint_profiles_ENCODE.Rmd" target="_blank">2783ac9</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-08-30
+</td>
+<td style="text-align:left;">
+plot DNase footprint profiles of CTCF and REST using ENCODE data
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/kevinlkx/ATAC-seq_footprint_analysis/dcc47c4d5c25dd142d4e01ef9cc4c125465432fd/docs/DNase_footprint_profiles_ENCODE.html" target="_blank">dcc47c4</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-08-29
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -722,6 +754,9 @@ pwm_name &lt;- &quot;CTCF_MA0139.1_1e-5&quot;
 dir_count_matrix &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_tagcount_matrix/&quot;)
 dir_sites_chip &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/ChIPSeq/&quot;)
 
+dir_matrix_examples &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_count_matrix_examples/&quot;)
+dir.create(dir_matrix_examples, showWarnings = F, recursive = T)
+
 filename_sites &lt;- paste0(dir_sites_chip, &quot;/&quot;, &quot;chipseq_&quot;, cell_type, &quot;_&quot;, pwm_name, &quot;_flank&quot;, flank, &quot;_exp1.totalcount&quot;)
 
 sites.df &lt;- read.table(filename_sites, header = T, comment.char = &quot;!&quot;, stringsAsFactors = F)
@@ -801,8 +836,7 @@ kevinlkx
 </table>
 <p></details></p>
 <pre class="r"><code>## save counts matrix
-rds_name &lt;- paste0(dir_count_matrix, &quot;/&quot;, tf_name, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_hg19_dnase_counts_selected_sites.rds&quot;)
-saveRDS(counts_selected.m, rds_name)</code></pre>
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_dnase_counts_selected_sites.rds&quot;))</code></pre>
 </div>
 <div id="plot-footprint-profiles-of-most-accessible-sites" class="section level3">
 <h3>plot footprint profiles of most accessible sites</h3>
@@ -868,6 +902,8 @@ pwm_name &lt;- &quot;CTCF_MA0139.1_1e-5&quot;
 
 dir_count_matrix &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_tagcount_matrix/&quot;)
 dir_sites_chip &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/ChIPSeq/&quot;)
+dir_matrix_examples &lt;- paste0(dir_data, &quot;/DNase-seq_ENCODE/&quot;, cell_type, &quot;/DNaseSeq/DNase_count_matrix_examples/&quot;)
+dir.create(dir_matrix_examples, showWarnings = F, recursive = T)
 
 filename_sites &lt;- paste0(dir_sites_chip, &quot;/&quot;, &quot;chipseq_&quot;, cell_type, &quot;_&quot;, pwm_name, &quot;_flank&quot;, flank, &quot;_exp1.totalcount&quot;)
 
@@ -948,8 +984,7 @@ kevinlkx
 </table>
 <p></details></p>
 <pre class="r"><code>## save counts matrix
-rds_name &lt;- paste0(dir_count_matrix, &quot;/&quot;, tf_name, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_hg19_dnase_counts_selected_sites.rds&quot;)
-saveRDS(counts_selected.m, rds_name)</code></pre>
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_dnase_counts_selected_sites.rds&quot;))</code></pre>
 </div>
 </div>
 <div id="rest-in-gm12878-cell-type" class="section level2">
@@ -1042,8 +1077,7 @@ kevinlkx
 </table>
 <p></details></p>
 <pre class="r"><code>## save counts matrix
-rds_name &lt;- paste0(dir_count_matrix, &quot;/&quot;, tf_name, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_hg19_dnase_counts_selected_sites.rds&quot;)
-saveRDS(counts_selected.m, rds_name)</code></pre>
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_dnase_counts_selected_sites.rds&quot;))</code></pre>
 </div>
 <div id="plot-footprint-profiles-of-most-accessible-sites-1" class="section level3">
 <h3>plot footprint profiles of most accessible sites</h3>
@@ -1202,8 +1236,7 @@ kevinlkx
 </table>
 <p></details></p>
 <pre class="r"><code>## save counts matrix
-rds_name &lt;- paste0(dir_count_matrix, &quot;/&quot;, tf_name, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_hg19_dnase_counts_selected_sites.rds&quot;)
-saveRDS(counts_selected.m, rds_name)</code></pre>
+saveRDS(counts_selected.m, paste0(dir_matrix_examples, &quot;/&quot;, pwm_name, &quot;_&quot;, cell_type, &quot;_dnase_counts_selected_sites.rds&quot;))</code></pre>
 </div>
 </div>
 <div id="session-information" class="section level2">
