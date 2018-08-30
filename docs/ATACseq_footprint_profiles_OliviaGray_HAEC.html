@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Kaixuan Luo" />
+
+
+<title>ATAC-seq footprint profiles using data of human amniotic epithelial cells (HAECs) between normoxia and hypoxia conditions from Olivia Gray</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">ATAC-seq analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">ATAC-seq footprint profiles using data of human amniotic epithelial cells (HAECs) between normoxia and hypoxia conditions from Olivia Gray</h1>
+<h4 class="author"><em>Kaixuan Luo</em></h4>
+<h4 class="date"><em>7/31/2018</em></h4>
+
+</div>
+
+
+<p><strong>Last updated:</strong> 2018-08-30</p>
+<strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
+<ul>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180613)</code> </summary></p>
+<p>The command <code>set.seed(20180613)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/tree/a9478f859ee32a3b0b855fd749b4b9a281107f62" target="_blank">a9478f8</a> </summary></p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    code_RCC/.DS_Store
+    Ignored:    data/.DS_Store
+
+Untracked files:
+    Untracked:  analysis/ATACseq_footprint_profiles_OliviaGray.Rmd
+    Untracked:  analysis/ATACseq_preprocessing_pipeline_GGR_hg38.Rmd
+    Untracked:  code_RCC/update_bamnames.R
+    Untracked:  workflow_setup.R
+
+Unstaged changes:
+    Modified:   analysis/ATACseq_preprocessing_pipeline.Rmd
+    Modified:   analysis/index.Rmd
+    Modified:   code_RCC/fimo_jaspar_motif_rcc.sh
+    Modified:   code_RCC/genome_coverage_bamToBigwig_GGR_hg38.sh
+    Modified:   code_RCC/get_motif_count_matrices_GGR_hg38.sh
+
+</code></pre>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
+</li>
+</ul>
+<details> <summary> <small><strong>Expand here to see past versions:</strong></small> </summary>
+<ul>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+File
+</th>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+<th style="text-align:left;">
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/kevinlkx/ATAC-seq_footprint_analysis/blob/a9478f859ee32a3b0b855fd749b4b9a281107f62/analysis/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd" target="_blank">a9478f8</a>
+</td>
+<td style="text-align:left;">
+kevinlkx
+</td>
+<td style="text-align:left;">
+2018-08-30
+</td>
+<td style="text-align:left;">
+plot ATAC-seq footprint profiles using HAEC data
+</td>
+</tr>
+</tbody>
+</table>
+</ul>
+<p></details></p>
+<hr />
+<div id="functions" class="section level2">
+<h2>functions</h2>
+<pre class="r"><code>## load and combine count matrices
+load_combine_counts &lt;- function(bam_basename, pwm_name, dir_count_matrix){
+  cat(&quot;Loading count matrices ... \n&quot;)
+  counts_fwd.df &lt;- read.table(paste0(dir_count_matrix, &quot;/&quot;, pwm_name, &quot;/&quot;, pwm_name, &quot;_&quot;, bam_basename, &quot;_fwdcounts.m.gz&quot;))
+  counts_rev.df &lt;- read.table(paste0(dir_count_matrix, &quot;/&quot;, pwm_name, &quot;/&quot;, pwm_name, &quot;_&quot;, bam_basename, &quot;_revcounts.m.gz&quot;))
+  
+  ## the first 5 columns from &quot;bwtool extract&quot; are chr, start, end, name, and the number of data points
+  counts_fwd.df &lt;- counts_fwd.df[, -c(1:5)]
+  counts_rev.df &lt;- counts_rev.df[, -c(1:5)]
+  
+  colnames(counts_fwd.df) &lt;- paste0(&quot;fwd&quot;, 1:ncol(counts_fwd.df))
+  colnames(counts_rev.df) &lt;- paste0(&quot;rev&quot;, 1:ncol(counts_rev.df))
+  
+  counts_combined.m &lt;- as.matrix(cbind(counts_fwd.df, counts_rev.df))
+  
+  return(counts_combined.m)
+}
+
+## select candidate sites by mapability and PWM score cutoffs
+select_sites &lt;- function(sites.df, thresh_mapability=NULL, thresh_PWMscore=NULL, readstats_name=NULL){
+  #  cat(&quot;loading sites ...\n&quot;)
+  
+  if(!is.null(thresh_mapability)){
+    cat(&quot;Select candidate sites with mapability &gt;=&quot;, thresh_mapability, &quot;\n&quot;)
+    idx_mapability &lt;- (sites.df[,&quot;mapability&quot;] &gt;= thresh_mapability)
+  }else{
+    idx_mapability &lt;- rep(TRUE, nrow(sites.df))
+  }
+  
+  if(!is.null(thresh_PWMscore)){
+    cat(&quot;Select candidate sites with PWM score &gt;=&quot;, thresh_PWMscore, &quot;\n&quot;)
+    idx_pwm &lt;- (sites.df[,&quot;pwm_score&quot;] &gt;= thresh_PWMscore)
+  }else{
+    idx_pwm &lt;- rep(TRUE, nrow(sites.df))
+  }
+  
+  if(!is.null(readstats_name)){
+    readstats.df &lt;- read.table(readstats_name, header = F)
+    ## if the readstats.df contains chrY, then it means the cell type is male, then the candidate sites should contain chrY,
+    ## otherwise, the cell type is female, then the candidate sites on chrY should be removed.
+    if( &quot;chrY&quot; %in% readstats.df[,1] ){
+      cat(&quot;include chrY sites \n&quot;)
+      idx_chr &lt;- (sites.df[,1] != &quot;&quot;)
+    }else{
+      cat(&quot;chrY NOT in the bam file, filter out chrY sites \n&quot;)
+      ## remove chrY from candidate (motif) sites
+      idx_chr &lt;- (sites.df[,1] != &quot;chrY&quot;)
+    }
+    
+  }else{
+    idx_chr &lt;- rep(TRUE, nrow(sites.df))
+  }
+  
+  idx_select &lt;- which(idx_mapability &amp; idx_pwm &amp; idx_chr)
+  
+  return(idx_select)
+}
+
+
+## plot footprint profiles for selected sites
+plot_footprint_sites &lt;- function(tf_name, pwm_name, treatment, flank = 100, thresh_mapability = NULL, thresh_PWMscore = 0, num_top_sites = 1000){
+  
+  filename_sites &lt;- paste0(dir_sites, &quot;/&quot;, pwm_name, &quot;_flank&quot;, flank, &quot;_fimo_sites.bed&quot;)
+  
+  sites.df &lt;- read.table(filename_sites, header = T, comment.char = &quot;!&quot;, stringsAsFactors = F)
+  
+  if(ver_genome == &quot;hg38&quot;){
+    thresh_mapability &lt;- NULL
+    colnames(sites.df) = c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;, &quot;name&quot;, &quot;pwm_score&quot;, &quot;strand&quot;, &quot;p_value&quot;)
+  }else{
+    colnames(sites.df) = c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;, &quot;name&quot;, &quot;pwm_score&quot;, &quot;strand&quot;, &quot;p_value&quot;, &quot;mapability&quot;)
+  }
+  
+  readstats_name &lt;-  paste0(dir_bam_idxstats, &quot;/&quot;, &quot;H1_nomito_rdup.idxstats.txt&quot;)
+  
+  idx_select &lt;- select_sites(sites.df, thresh_mapability, thresh_PWMscore, readstats_name)
+  
+  sites.df &lt;- sites.df[idx_select, c(&quot;chr&quot;, &quot;start&quot;, &quot;end&quot;, &quot;name&quot;, &quot;pwm_score&quot;, &quot;strand&quot;, &quot;p_value&quot;)]
+  cat(&quot;Number of sites:&quot;, nrow(sites.df), &quot;\n&quot;)
+  
+  counts_rep1.m &lt;- load_combine_counts(paste0(treatment, &quot;1_nomito_rdup&quot;), pwm_name, dir_count_matrix)[idx_select,]
+  counts_rep2.m &lt;- load_combine_counts(paste0(treatment, &quot;2_nomito_rdup&quot;), pwm_name, dir_count_matrix)[idx_select,]
+  counts_rep3.m &lt;- load_combine_counts(paste0(treatment, &quot;3_nomito_rdup&quot;), pwm_name, dir_count_matrix)[idx_select,]
+  counts_combined.m &lt;- counts_rep1.m + counts_rep2.m + counts_rep3.m
+  
+  ## Clip extreme values
+  counts_combined.m[counts_combined.m &gt; max_cuts] &lt;- max_cuts
+  
+  cat(&quot;Dimension of&quot;, dim(counts_combined.m), &quot;\n&quot;)
+  
+  if(nrow(counts_combined.m) != nrow(sites.df)){
+    stop(&quot;Sites not matched!&quot;)
+  }
+  
+  ## plot ATAC-seq cut profiles of most accessible sites 
+  order_selected &lt;- order(rowSums(counts_combined.m), decreasing = T)[1:num_top_sites]
+  counts_selected.m &lt;- counts_combined.m[order_selected,]
+  counts_profile &lt;- apply(counts_selected.m, 2, mean)
+  
+  par(mfrow = c(1,2))
+  counts &lt;- counts_profile[1:(length(counts_profile)/2)]
+  plot(counts, type = &quot;l&quot;, col = &quot;blue&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
+       main = &quot;&quot;, xaxt = &quot;n&quot;)
+  mtext(text = paste(tf_name, treatment, &quot;forward strand&quot;), side = 3, line = 1, cex = 1)
+  axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
+       cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+  
+  counts &lt;- counts_profile[(length(counts_profile)/2+1): length(counts_profile)]
+  
+  plot(counts, type = &quot;l&quot;, col = &quot;red&quot;, xlab = &quot;Relative position (bp)&quot;, ylab = &quot;Average counts&quot;, 
+       main = &quot;&quot;, xaxt = &quot;n&quot;)
+  mtext(text = paste(tf_name, treatment, &quot;reverse strand&quot;), side = 3, line = 1, cex = 1)
+  axis(1,at=c(1, flank+1, length(counts)-flank, length(counts)), labels=c(-flank, &#39;&#39;,&#39;&#39; ,flank), 
+       cex.axis = 1, tck=-0.03, tick = T, cex = 1)
+  
+  
+  ## save counts matrix
+  saveRDS(counts_selected.m, paste0(dir_matrix_examples, &quot;/&quot;, pwm_name, &quot;_&quot;, treatment, &quot;_reps_counts_selected_sites.rds&quot;))
+  
+}</code></pre>
+</div>
+<div id="parameters" class="section level2">
+<h2>parameters</h2>
+<pre class="r"><code>ver_genome &lt;- &quot;hg19&quot;
+flank &lt;- 100
+thresh_mapability &lt;- 0.8
+thresh_PWMscore &lt;- 10
+num_top_sites &lt;- 1000
+bam_name_list &lt;- c(&quot;H1_nomito_rdup.bam&quot;, &quot;N1_nomito_rdup.bam&quot;)
+max_cuts &lt;- 20 # Clip extreme values
+
+dir_data &lt;- &quot;~/Dropbox/research/ATAC_DNase/&quot;
+
+dir_count_matrix &lt;- paste0(dir_data, &quot;/ATAC-seq_Olivia_Gray/results/ATAC-seq_count_matrix/&quot;)
+dir_bam_idxstats &lt;- paste0(dir_data, &quot;/ATAC-seq_Olivia_Gray/ATAC-seq_BAMfiles/&quot;)
+dir_sites &lt;- paste0(dir_data, &quot;/motif_sites_JASPAR2018/hg19/candidate_sites/1e-4/&quot;)
+
+dir_matrix_examples &lt;- paste0(dir_data, &quot;/ATAC-seq_Olivia_Gray/results/ATAC-seq_count_matrix_examples/&quot;)
+dir.create(dir_matrix_examples, showWarnings = F, recursive = T)</code></pre>
+</div>
+<div id="atac-seq-footprint-profiles-for-ctcf" class="section level2">
+<h2>ATAC-seq footprint profiles for CTCF</h2>
+<pre class="r"><code>tf_name &lt;- &quot;CTCF&quot;
+pwm_name &lt;- &quot;CTCF_MA0139.1_1e-4&quot;
+
+plot_footprint_sites(tf_name, pwm_name, treatment = &quot;H&quot;, flank, thresh_mapability, thresh_PWMscore, num_top_sites)</code></pre>
+<pre><code>Select candidate sites with mapability &gt;= 0.8 
+Select candidate sites with PWM score &gt;= 10 
+include chrY sites 
+Number of sites: 196871 
+Loading count matrices ... 
+Loading count matrices ... 
+Loading count matrices ... 
+Dimension of 196871 436 </code></pre>
+<p><img src="figure/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_footprint_sites(tf_name, pwm_name, treatment = &quot;N&quot;, flank, thresh_mapability, thresh_PWMscore, num_top_sites)</code></pre>
+<pre><code>Select candidate sites with mapability &gt;= 0.8 
+Select candidate sites with PWM score &gt;= 10 
+include chrY sites 
+Number of sites: 196871 
+Loading count matrices ... 
+Loading count matrices ... 
+Loading count matrices ... 
+Dimension of 196871 436 </code></pre>
+<p><img src="figure/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd/unnamed-chunk-3-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="atac-seq-footprint-profiles-for-hif1a" class="section level2">
+<h2>ATAC-seq footprint profiles for HIF1A</h2>
+<pre class="r"><code>tf_name &lt;- &quot;HIF1A&quot;
+pwm_name &lt;- &quot;HIF1A_MA1106.1_1e-4&quot;
+
+plot_footprint_sites(tf_name, pwm_name, treatment = &quot;H&quot;, flank, thresh_mapability, thresh_PWMscore, num_top_sites)</code></pre>
+<pre><code>Select candidate sites with mapability &gt;= 0.8 
+Select candidate sites with PWM score &gt;= 10 
+include chrY sites 
+Number of sites: 69233 
+Loading count matrices ... 
+Loading count matrices ... 
+Loading count matrices ... 
+Dimension of 69233 418 </code></pre>
+<p><img src="figure/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_footprint_sites(tf_name, pwm_name, treatment = &quot;N&quot;, flank, thresh_mapability, thresh_PWMscore, num_top_sites)</code></pre>
+<pre><code>Select candidate sites with mapability &gt;= 0.8 
+Select candidate sites with PWM score &gt;= 10 
+include chrY sites 
+Number of sites: 69233 
+Loading count matrices ... 
+Loading count matrices ... 
+Loading count matrices ... 
+Dimension of 69233 418 </code></pre>
+<p><img src="figure/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="atac-seq-footprint-profiles-for-mef2d" class="section level2">
+<h2>ATAC-seq footprint profiles for MEF2D</h2>
+<pre class="r"><code>tf_name &lt;- &quot;MEF2D&quot;
+pwm_name &lt;- &quot;MEF2D_MA0773.1_1e-4&quot;
+
+plot_footprint_sites(tf_name, pwm_name, treatment = &quot;H&quot;, flank, thresh_mapability, thresh_PWMscore, num_top_sites)</code></pre>
+<pre><code>Select candidate sites with mapability &gt;= 0.8 
+Select candidate sites with PWM score &gt;= 10 
+include chrY sites 
+Number of sites: 230812 
+Loading count matrices ... 
+Loading count matrices ... 
+Loading count matrices ... 
+Dimension of 230812 422 </code></pre>
+<p><img src="figure/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>plot_footprint_sites(tf_name, pwm_name, treatment = &quot;N&quot;, flank, thresh_mapability, thresh_PWMscore, num_top_sites)</code></pre>
+<pre><code>Select candidate sites with mapability &gt;= 0.8 
+Select candidate sites with PWM score &gt;= 10 
+include chrY sites 
+Number of sites: 230812 
+Loading count matrices ... 
+Loading count matrices ... 
+Loading count matrices ... 
+Dimension of 230812 422 </code></pre>
+<p><img src="figure/ATACseq_footprint_profiles_OliviaGray_HAEC.Rmd/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.4.3 (2017-11-30)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS High Sierra 10.13.6
+
+Matrix products: default
+BLAS: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.4/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] workflowr_1.1.1   Rcpp_0.12.16      digest_0.6.15    
+ [4] rprojroot_1.3-2   R.methodsS3_1.7.1 backports_1.1.2  
+ [7] git2r_0.21.0      magrittr_1.5      evaluate_0.10.1  
+[10] stringi_1.1.7     whisker_0.3-2     R.oo_1.22.0      
+[13] R.utils_2.6.0     rmarkdown_1.9     tools_3.4.3      
+[16] stringr_1.3.0     yaml_2.1.18       compiler_3.4.3   
+[19] htmltools_0.3.6   knitr_1.20       </code></pre>
+</div>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<hr>
+<p>
+  This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a>
+  analysis was created with
+  <a href="https://github.com/jdblischak/workflowr">workflowr</a> 1.1.1
+</p>
+<hr>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
